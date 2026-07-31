@@ -27,16 +27,50 @@ export default function SuperPropertyEditor(){
  useEffect(()=>{
   if(!rooms.length)return;
   setPhysicalRooms(current=>{
-   const next=[...current];
+   let next=[...current];
    let changed=false;
+
    rooms.filter(room=>room.id&&room.is_active).forEach(roomType=>{
-    const existingCount=next.filter(room=>room.room_type_id===roomType.id).length;
     const requiredCount=Math.max(0,Number(roomType.room_count)||0);
-    for(let index=existingCount;index<requiredCount;index++){
-     next.push({...newPhysicalRoom(),room_type_id:roomType.id||"",display_order:next.length});
-     changed=true;
+    const matchingIndexes=next
+     .map((room,index)=>({room,index}))
+     .filter(item=>item.room.room_type_id===roomType.id);
+
+    if(matchingIndexes.length<requiredCount){
+     for(let index=matchingIndexes.length;index<requiredCount;index++){
+      next.push({
+       ...newPhysicalRoom(),
+       room_type_id:roomType.id||"",
+       display_order:next.length
+      });
+      changed=true;
+     }
+    }
+
+    if(matchingIndexes.length>requiredCount){
+     const removable=matchingIndexes
+      .slice(requiredCount)
+      .filter(item=>
+       !item.room.id &&
+       !item.room.room_name.trim() &&
+       !item.room.room_code.trim() &&
+       !item.room.floor.trim() &&
+       !item.room.view_type.trim()
+      )
+      .map(item=>item.index)
+      .sort((a,b)=>b-a);
+
+     removable.forEach(index=>{
+      next.splice(index,1);
+      changed=true;
+     });
     }
    });
+
+   next=next.map((room,index)=>
+    room.display_order===index?room:{...room,display_order:index}
+   );
+
    return changed?next:current;
   });
  },[rooms]);
@@ -45,10 +79,22 @@ export default function SuperPropertyEditor(){
  async function delRoom(i:number){const r=rooms[i];if(r.id){const{error}=await supabase.from("os_property_room_types").delete().eq("id",r.id);if(error){setError(error.message);return;}}setRooms(x=>x.filter((_,n)=>n!==i));}
  async function upload(e:ChangeEvent<HTMLInputElement>){if(!property||!e.target.files?.length)return;setUploading(true);for(const file of Array.from(e.target.files)){const path=`${property.hotel_code}/${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]/g,"-")}`;const u=await supabase.storage.from("os-property-media").upload(path,file);if(u.error){setError(u.error.message);setUploading(false);return;}const url=supabase.storage.from("os-property-media").getPublicUrl(path).data.publicUrl;const q=await supabase.from("os_property_photos").insert({property_id:property.id,storage_path:path,public_url:url,category:"property",is_cover:photos.length===0,display_order:photos.length});if(q.error){setError(q.error.message);setUploading(false);return;}}setUploading(false);await load();}
  async function delPhoto(p:Photo){await supabase.storage.from("os-property-media").remove([p.storage_path]);await supabase.from("os_property_photos").delete().eq("id",p.id);await load();}
+  const calculatedRoomTotal=useMemo(
+  ()=>rooms.filter(room=>room.is_active).reduce((total,room)=>total+Math.max(0,Number(room.room_count)||0),0),
+  [rooms]
+ );
+
+ useEffect(()=>{
+  setProperty(current=>{
+   if(!current||current.number_of_rooms===calculatedRoomTotal)return current;
+   return {...current,number_of_rooms:calculatedRoomTotal};
+  });
+ },[calculatedRoomTotal]);
+
  const completion=useMemo(()=>{if(!property)return 0;const checks=[property.hotel_name,property.address,property.phone,property.email,profile.short_description,profile.full_description,profile.google_maps_url,profile.amenities,profile.cancellation_policy,profile.child_policy,profile.overall_min_rate,profile.overall_max_rate,rooms.length>0,physicalRooms.length>0,rooms.some(r=>r.minimum_rate&&r.maximum_rate),channels.some(c=>c.public_url),photos.length>0];return Math.round(checks.filter(Boolean).length/checks.length*100)},[property,profile,rooms,physicalRooms,channels,photos]);
  if(loading||!property)return <div className={styles.loading}><Loader2 className={styles.spin}/>Loading property profileâ€¦</div>;
  return <div className={styles.page}><section className={styles.hero}><div><span>PROPERTY GROWTH PROFILE</span><h2>{property.hotel_name}</h2><p>One trusted source for your booking engine, revenue, marketing, reputation and OTA information.</p></div><aside><small>PROFILE COMPLETION</small><strong>{completion}%</strong><div><i style={{width:`${completion}%`}}/></div><span>{completion>=85?"Booking engine ready":"Complete missing information"}</span></aside></section><div className={styles.tabs}>{[["overview","Overview"],["contacts","Location & Contacts"],["rooms",`Room Types (${rooms.length})`],["individual-rooms",`Individual Rooms (${physicalRooms.length})`],["commercial","Rates & Meal Plans"],["policies","Amenities & Policies"],["channels","OTA & Online Links"],["photos",`Photos (${photos.length})`]].map(([k,l])=><button key={k} className={tab===k?styles.activeTab:""} onClick={()=>setTab(k as Tab)}>{l}</button>)}</div>{error&&<div className={styles.error}>{error}</div>}{message&&<div className={styles.success}>{message}</div>}
- {tab==="overview"&&<Section title="Property identity" text="Public and operational information used throughout Hotel OS"><Grid><Field label="Hotel code"><input value={property.hotel_code} disabled/></Field><Field label="Hotel name"><input value={property.hotel_name} onChange={e=>pf("hotel_name",e.target.value)}/></Field><Field label="Public display name"><input value={profile.public_name} onChange={e=>sf("public_name",e.target.value)}/></Field><Field label="Property type"><select value={property.property_type} onChange={e=>pf("property_type",e.target.value)}>{["Hotel","Boutique Hotel","Villa","Resort","Guest House","Apartment","Hostel"].map(x=><option key={x}>{x}</option>)}</select></Field><Field label="Star rating"><input type="number" step=".5" min="0" max="5" value={profile.star_rating} onChange={e=>sf("star_rating",e.target.value)}/></Field><Field label="Opening year"><input type="number" value={profile.opening_year} onChange={e=>sf("opening_year",e.target.value)}/></Field><Field label="Total rooms"><input type="number" value={property.number_of_rooms} onChange={e=>pf("number_of_rooms",Number(e.target.value))}/></Field><Field label="Languages"><input value={profile.languages} onChange={e=>sf("languages",e.target.value)}/></Field><Field label="Short selling description" wide><textarea rows={3} value={profile.short_description} onChange={e=>sf("short_description",e.target.value)}/></Field><Field label="Full OTA / booking engine description" wide><textarea rows={7} value={profile.full_description} onChange={e=>sf("full_description",e.target.value)}/></Field></Grid></Section>}
+ {tab==="overview"&&<Section title="Property identity" text="Public and operational information used throughout Hotel OS"><Grid><Field label="Hotel code"><input value={property.hotel_code} disabled/></Field><Field label="Hotel name"><input value={property.hotel_name} onChange={e=>pf("hotel_name",e.target.value)}/></Field><Field label="Public display name"><input value={profile.public_name} onChange={e=>sf("public_name",e.target.value)}/></Field><Field label="Property type"><select value={property.property_type} onChange={e=>pf("property_type",e.target.value)}>{["Hotel","Boutique Hotel","Villa","Resort","Guest House","Apartment","Hostel"].map(x=><option key={x}>{x}</option>)}</select></Field><Field label="Star rating"><input type="number" step=".5" min="0" max="5" value={profile.star_rating} onChange={e=>sf("star_rating",e.target.value)}/></Field><Field label="Opening year"><input type="number" value={profile.opening_year} onChange={e=>sf("opening_year",e.target.value)}/></Field><Field label="Total rooms"><input type="number" value={calculatedRoomTotal} disabled/><small className={styles.fieldHint}>Calculated automatically from active Room Types</small></Field><Field label="Languages"><input value={profile.languages} onChange={e=>sf("languages",e.target.value)}/></Field><Field label="Short selling description" wide><textarea rows={3} value={profile.short_description} onChange={e=>sf("short_description",e.target.value)}/></Field><Field label="Full OTA / booking engine description" wide><textarea rows={7} value={profile.full_description} onChange={e=>sf("full_description",e.target.value)}/></Field></Grid></Section>}
  {tab==="contacts"&&<Section title="Location and contacts" text="Accurate guest, map and arrival information"><Grid><Field label="Address" wide><input value={property.address||""} onChange={e=>pf("address",e.target.value)}/></Field><Field label="City"><input value={property.city||""} onChange={e=>pf("city",e.target.value)}/></Field><Field label="District"><input value={profile.district} onChange={e=>sf("district",e.target.value)}/></Field><Field label="Province"><input value={profile.province} onChange={e=>sf("province",e.target.value)}/></Field><Field label="Postcode"><input value={profile.postcode} onChange={e=>sf("postcode",e.target.value)}/></Field><Field label="Country"><input value={property.country} onChange={e=>pf("country",e.target.value)}/></Field><Field label="Main phone"><input value={property.phone||""} onChange={e=>pf("phone",e.target.value)}/></Field><Field label="WhatsApp"><input value={property.whatsapp||""} onChange={e=>pf("whatsapp",e.target.value)}/></Field><Field label="Reservation email"><input value={profile.reservation_email} onChange={e=>sf("reservation_email",e.target.value)}/></Field><Field label="General email"><input value={profile.general_email} onChange={e=>sf("general_email",e.target.value)}/></Field><Field label="Google Maps URL" wide><input value={profile.google_maps_url} onChange={e=>sf("google_maps_url",e.target.value)}/></Field><Field label="Latitude"><input value={profile.latitude} onChange={e=>sf("latitude",e.target.value)}/></Field><Field label="Longitude"><input value={profile.longitude} onChange={e=>sf("longitude",e.target.value)}/></Field><Field label="Check-in"><input type="time" value={(property.check_in_time||"").slice(0,5)} onChange={e=>pf("check_in_time",e.target.value)}/></Field><Field label="Check-out"><input type="time" value={(property.check_out_time||"").slice(0,5)} onChange={e=>pf("check_out_time",e.target.value)}/></Field><Field label="Directions" wide><textarea rows={4} value={profile.directions} onChange={e=>sf("directions",e.target.value)}/></Field><Field label="Arrival notes" wide><textarea rows={4} value={profile.arrival_notes} onChange={e=>sf("arrival_notes",e.target.value)}/></Field></Grid></Section>}
  {tab==="rooms"&&<Section title="Room types" text="Complete inventory, occupancy, beds and approved rate boundaries"><Action onClick={()=>setRooms(x=>[...x,newRoom()])}>Add room type</Action><div className={styles.cards}>{rooms.map((r,i)=><article className={styles.card} key={r.id||i}><header><div><small>ROOM TYPE {i+1}</small><h3>{r.name||"New room type"}</h3></div><button className={styles.delete} onClick={()=>delRoom(i)}><Trash2 size={16}/></button></header><Grid><Field label="Code"><input value={r.code} onChange={e=>rf(i,"code",e.target.value)}/></Field><Field label="Name"><input value={r.name} onChange={e=>rf(i,"name",e.target.value)}/></Field><Field label="Room count"><input type="number" value={r.room_count} onChange={e=>rf(i,"room_count",Number(e.target.value))}/></Field><Field label="Room size mÂ²"><input type="number" value={r.room_size_sqm} onChange={e=>rf(i,"room_size_sqm",e.target.value)}/></Field><Field label="Standard adults"><input type="number" value={r.standard_adults} onChange={e=>rf(i,"standard_adults",Number(e.target.value))}/></Field><Field label="Maximum adults"><input type="number" value={r.max_adults} onChange={e=>rf(i,"max_adults",Number(e.target.value))}/></Field><Field label="Maximum children"><input type="number" value={r.max_children} onChange={e=>rf(i,"max_children",Number(e.target.value))}/></Field><Field label="Maximum occupancy"><input type="number" value={r.max_occupancy} onChange={e=>rf(i,"max_occupancy",Number(e.target.value))}/></Field><Field label="Bed configuration"><input value={r.bed_configuration} onChange={e=>rf(i,"bed_configuration",e.target.value)}/></Field><Field label="View"><input value={r.view_type} onChange={e=>rf(i,"view_type",e.target.value)}/></Field><Field label="Minimum rate"><input type="number" value={r.minimum_rate} onChange={e=>rf(i,"minimum_rate",e.target.value)}/></Field><Field label="Default rate"><input type="number" value={r.default_rate} onChange={e=>rf(i,"default_rate",e.target.value)}/></Field><Field label="Maximum rate"><input type="number" value={r.maximum_rate} onChange={e=>rf(i,"maximum_rate",e.target.value)}/></Field><Field label="Child charge"><input type="number" value={r.child_charge} onChange={e=>rf(i,"child_charge",e.target.value)}/></Field><Field label="Extra bed charge"><input type="number" value={r.extra_bed_charge} onChange={e=>rf(i,"extra_bed_charge",e.target.value)}/></Field><Field label="Amenities" wide><input value={r.amenities} onChange={e=>rf(i,"amenities",e.target.value)}/></Field><Field label="Description" wide><textarea rows={4} value={r.description} onChange={e=>rf(i,"description",e.target.value)}/></Field></Grid></article>)}</div></Section>}
 
@@ -59,4 +105,5 @@ export default function SuperPropertyEditor(){
  {tab==="photos"&&<Section title="Property photos" text="Upload original photographs for booking engine and marketing"><label className={styles.uploader}>{uploading?<Loader2 className={styles.spin}/>:<ImagePlus size={26}/>}<strong>{uploading?"Uploadingâ€¦":"Upload property photos"}</strong><span>JPG, PNG or WebP â€¢ Maximum 10 MB</span><input type="file" multiple accept="image/jpeg,image/png,image/webp" onChange={upload}/></label><div className={styles.photoGrid}>{photos.map(p=><article key={p.id}><img src={p.public_url} alt={p.caption||"Hotel photo"}/><div><span>{p.is_cover?"Cover photo":p.category}</span><button onClick={()=>delPhoto(p)}><Trash2 size={15}/></button></div></article>)}</div></Section>}
  <div className={styles.saveBar}><div><strong>{property.hotel_name}</strong><span>{completion}% complete â€¢ {rooms.length} room types â€¢ {physicalRooms.length} individual rooms â€¢ {photos.length} photos</span></div><button onClick={save} disabled={saving}>{saving?<Loader2 className={styles.spin} size={17}/>:<Save size={17}/>}Save complete profile</button></div></div>}
 function Section({title,text,children}:{title:string;text:string;children:React.ReactNode}){return <section className={styles.section}><header><div><h2>{title}</h2><p>{text}</p></div></header>{children}</section>}function Grid({children}:{children:React.ReactNode}){return <div className={styles.grid}>{children}</div>}function Field({label,children,wide=false}:{label:string;children:React.ReactNode;wide?:boolean}){return <label className={wide?styles.wide:""}><span>{label}</span>{children}</label>}function Action({onClick,children}:{onClick:()=>void;children:React.ReactNode}){return <div className={styles.action}><button onClick={onClick}><Plus size={16}/>{children}</button></div>}
+
 
