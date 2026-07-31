@@ -1,68 +1,46 @@
-N K HOTEL OS — MOVE ALL PAGES INTO PERSISTENT LAYOUT
+N K HOTEL OS — CALENDAR FIT + PREMIUM UI UPDATE
 
-CONFIRMED PROBLEM
+CHANGES
 
-/dashboard is located at:
-app/(os)/dashboard/page.tsx
-
-But Calendar is located at:
-app/calendar/page.tsx
-
-Therefore only Dashboard receives:
-app/(os)/layout.tsx
-
-The other routes use their own old OSPageShell, so the global center MENU clip
-cannot control them.
-
-THIS SCRIPT MOVES ALL PROTECTED ROUTES INTO app/(os).
-
-The URLs do not change because folders in parentheses are Next.js route groups.
-
-Examples:
-
-app/calendar/page.tsx
-becomes
-app/(os)/calendar/page.tsx
-
-The browser URL remains:
-/calendar
+- Removes Direct from the booking source dropdown.
+- FIT becomes the default for all direct inquiries.
+- Converts existing Direct labels to FIT in the interface.
+- Includes SQL to convert existing Direct booking rows to FIT.
+- Gives FIT and Travel Agent clearly different colors.
+- Adds a reliable Lucide close icon to booking modals.
+- Clicking outside the Add/Edit Booking modal closes it.
+- Removes horizontal scrolling from the booking window.
+- Makes the booking modal responsive and premium.
+- Improves selected room chips.
+- Adds a sticky Save/Cancel footer.
+- Improves Booking.com, Agoda, Airbnb, Expedia, FIT, Travel Agent and Block colors.
 
 INSTALL
 
-1. Extract this ZIP into:
+1. Extract into:
 
 E:\NK Labs\NK Hotel OS
 
-2. Run:
+2. Run the SQL file in Supabase SQL Editor:
+
+supabase\NK_Hotel_OS_Convert_Direct_To_FIT.sql
+
+3. Run PowerShell:
 
 Set-Location "E:\NK Labs\NK Hotel OS"
 
-.\move-all-pages-into-os-layout.ps1
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+
+.\install-calendar-fit-premium-ui.ps1
+
+4. Build:
+
+Remove-Item ".next" -Recurse -Force -ErrorAction SilentlyContinue
 
 npm run build
 
-3. After the build succeeds:
+5. Push:
 
-git add .
-git commit -m "Move all Hotel OS pages into persistent layout"
+git add "app/components/calendar" "app/api/calendar/bookings/route.ts" "app/**/*.css" "supabase/NK_Hotel_OS_Convert_Direct_To_FIT.sql"
+git commit -m "Upgrade calendar booking UI and standardize FIT source"
 git push origin main
-
-EXPECTED RESULT
-
-The same center MENU / CLOSE clip works on:
-
-- Dashboard
-- Calendar
-- Occupancy
-- Revenue Manager
-- Marketing Manager
-- Reputation Manager
-- Tools
-- Actions
-- QR Menu
-- Reports
-- Property
-- Rooms
-- Staff
-- Notifications
-- Settings

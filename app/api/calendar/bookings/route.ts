@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+﻿import { randomUUID } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "../../../lib/supabaseAdmin";
 import { isMasterSession, readServerSession } from "../../../lib/serverSession";
@@ -100,7 +100,7 @@ function bookingBody(
     room_type: roomTypeName(room.room_type),
     booking_reference:
       String(input.booking_reference || "").trim() || null,
-    booking_source: String(input.booking_source || "Direct").trim(),
+    booking_source: String(input.booking_source || "FIT").trim() === "Direct" ? "FIT" : String(input.booking_source || "FIT").trim(),
     booking_status: String(input.booking_status || "Confirmed").trim(),
     check_in: String(input.check_in || ""),
     check_out: String(input.check_out || ""),
@@ -527,3 +527,4 @@ export async function DELETE(request: NextRequest) {
     );
   }
 }
+
