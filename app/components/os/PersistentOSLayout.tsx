@@ -6,14 +6,13 @@ import {
   Building2,
   CalendarDays,
   ChartNoAxesCombined,
+  ChevronRight,
   Hotel,
   LayoutDashboard,
   Loader2,
   LogOut,
   Megaphone,
   Menu,
-  PanelLeftClose,
-  PanelLeftOpen,
   QrCode,
   Settings,
   Sparkles,
@@ -26,11 +25,15 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { ReactNode, useEffect, useMemo, useState } from "react";
+import {
+  ReactNode,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { createClient } from "../../lib/supabase/client";
 import styles from "./PersistentOSLayout.module.css";
-
-const SIDEBAR_STORAGE_KEY = "nkh-os-sidebar-hidden";
 
 const navigation = [
   ["Dashboard", "/dashboard", LayoutDashboard],
@@ -81,18 +84,12 @@ export default function PersistentOSLayout({
   const supabase = useMemo(() => createClient(), []);
 
   const [ready, setReady] = useState(false);
-  const [sidebarReady, setSidebarReady] = useState(false);
+  const [desktopOpen, setDesktopOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [sidebarHidden, setSidebarHidden] = useState(false);
   const [name, setName] = useState("Hotelier");
   const [role, setRole] = useState("Master");
 
-  useEffect(() => {
-    setSidebarHidden(
-      window.localStorage.getItem(SIDEBAR_STORAGE_KEY) === "true",
-    );
-    setSidebarReady(true);
-  }, []);
+  const closeTimer = useRef<number | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -139,17 +136,40 @@ export default function PersistentOSLayout({
     return () => {
       active = false;
       subscription.unsubscribe();
+
+      if (closeTimer.current !== null) {
+        window.clearTimeout(closeTimer.current);
+      }
     };
   }, [router, supabase]);
 
-  function hideSidebar() {
-    setSidebarHidden(true);
-    window.localStorage.setItem(SIDEBAR_STORAGE_KEY, "true");
+  function openDesktopSidebar() {
+    if (closeTimer.current !== null) {
+      window.clearTimeout(closeTimer.current);
+      closeTimer.current = null;
+    }
+
+    setDesktopOpen(true);
   }
 
-  function showSidebar() {
-    setSidebarHidden(false);
-    window.localStorage.setItem(SIDEBAR_STORAGE_KEY, "false");
+  function scheduleDesktopClose() {
+    if (closeTimer.current !== null) {
+      window.clearTimeout(closeTimer.current);
+    }
+
+    closeTimer.current = window.setTimeout(() => {
+      setDesktopOpen(false);
+      closeTimer.current = null;
+    }, 180);
+  }
+
+  function closeDesktopImmediately() {
+    if (closeTimer.current !== null) {
+      window.clearTimeout(closeTimer.current);
+      closeTimer.current = null;
+    }
+
+    setDesktopOpen(false);
   }
 
   async function signOut() {
@@ -157,7 +177,7 @@ export default function PersistentOSLayout({
     router.replace("/login");
   }
 
-  if (!ready || !sidebarReady) {
+  if (!ready) {
     return (
       <main className={styles.loading}>
         <Loader2 className={styles.spin} />
@@ -169,14 +189,18 @@ export default function PersistentOSLayout({
     items: typeof navigation | typeof moreNavigation,
   ) =>
     items.map(([label, href, Icon]) => {
-      const active = pathname === href || pathname.startsWith(`${href}/`);
+      const active =
+        pathname === href || pathname.startsWith(`${href}/`);
 
       return (
         <Link
           key={href}
           href={href}
           className={active ? styles.active : ""}
-          onClick={() => setMobileOpen(false)}
+          onClick={() => {
+            setMobileOpen(false);
+            closeDesktopImmediately();
+          }}
         >
           <Icon size={18} />
           <span>{label}</span>
@@ -185,15 +209,35 @@ export default function PersistentOSLayout({
     });
 
   return (
-    <main
-      className={`${styles.shell} ${
-        sidebarHidden ? styles.sidebarIsHidden : ""
-      }`}
-    >
+    <main className={styles.shell}>
+      <div
+        className={styles.desktopHoverZone}
+        onMouseEnter={openDesktopSidebar}
+        aria-hidden="true"
+      />
+
+      <button
+        type="button"
+        className={`${styles.menuClip} ${
+          desktopOpen ? styles.menuClipOpen : ""
+        }`}
+        onMouseEnter={openDesktopSidebar}
+        onMouseLeave={scheduleDesktopClose}
+        onFocus={openDesktopSidebar}
+        onBlur={scheduleDesktopClose}
+        aria-label="Open menu"
+        title="Move cursor here to open menu"
+      >
+        <span />
+        <ChevronRight size={17} />
+      </button>
+
       <aside
         className={`${styles.sidebar} ${
-          mobileOpen ? styles.mobileOpen : ""
-        } ${sidebarHidden ? styles.hiddenSidebar : ""}`}
+          desktopOpen ? styles.desktopOpen : ""
+        } ${mobileOpen ? styles.mobileOpen : ""}`}
+        onMouseEnter={openDesktopSidebar}
+        onMouseLeave={scheduleDesktopClose}
       >
         <div className={styles.brand}>
           <span>
@@ -217,15 +261,6 @@ export default function PersistentOSLayout({
           </button>
         </div>
 
-        <button
-          type="button"
-          className={styles.hideMenuButton}
-          onClick={hideSidebar}
-        >
-          <PanelLeftClose size={17} />
-          <span>Hide menu</span>
-        </button>
-
         <nav>{renderLinks(navigation)}</nav>
 
         <p className={styles.sectionLabel}>MANAGE</p>
@@ -234,10 +269,12 @@ export default function PersistentOSLayout({
 
         <div className={styles.user}>
           <i>{name.charAt(0).toUpperCase()}</i>
+
           <div>
             <strong>{name}</strong>
             <small>{role}</small>
           </div>
+
           <button
             type="button"
             onClick={signOut}
@@ -256,19 +293,6 @@ export default function PersistentOSLayout({
           onClick={() => setMobileOpen(false)}
           aria-label="Close menu"
         />
-      ) : null}
-
-      {sidebarHidden ? (
-        <button
-          type="button"
-          className={styles.showMenuButton}
-          onClick={showSidebar}
-          title="Show menu"
-          aria-label="Show menu"
-        >
-          <PanelLeftOpen size={19} />
-          <span>Show menu</span>
-        </button>
       ) : null}
 
       <section className={styles.main}>
