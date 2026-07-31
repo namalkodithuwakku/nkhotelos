@@ -1,14 +1,10 @@
 import RevenueManagerWorkspace from "../components/revenue/RevenueManagerWorkspace";
-import OSProtectedPage from "../components/os/OSProtectedPage";
+import OSPageShell from "../components/os/OSPageShell";
 
 export default function RevenueManagerPage() {
   return (
-    <OSProtectedPage
-      eyebrow="N K Hotel OS"
-      title="Revenue Manager"
-      fullWidth
-    >
+    <OSPageShell title="Revenue Manager" compact>
       <RevenueManagerWorkspace />
-    </OSProtectedPage>
+    </OSPageShell>
   );
 }

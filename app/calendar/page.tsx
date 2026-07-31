@@ -1,14 +1,10 @@
 import CalendarWorkspace from "../components/calendar/CalendarWorkspace";
-import OSProtectedPage from "../components/os/OSProtectedPage";
+import OSPageShell from "../components/os/OSPageShell";
 
 export default function CalendarPage() {
   return (
-    <OSProtectedPage
-      eyebrow="N K Hotel OS"
-      title="Booking Calendar"
-      fullWidth
-    >
+    <OSPageShell title="Booking Calendar" compact>
       <CalendarWorkspace />
-    </OSProtectedPage>
+    </OSPageShell>
   );
 }

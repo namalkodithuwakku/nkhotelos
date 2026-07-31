@@ -1,14 +1,10 @@
 import OccupancyInventoryWorkspace from "../components/occupancy/OccupancyInventoryWorkspace";
-import OSProtectedPage from "../components/os/OSProtectedPage";
+import OSPageShell from "../components/os/OSPageShell";
 
 export default function OccupancyPage() {
   return (
-    <OSProtectedPage
-      eyebrow="N K Hotel OS"
-      title="Occupancy"
-      fullWidth
-    >
+    <OSPageShell title="Occupancy" compact>
       <OccupancyInventoryWorkspace />
-    </OSProtectedPage>
+    </OSPageShell>
   );
 }
