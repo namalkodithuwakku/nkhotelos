@@ -3,7 +3,7 @@
 import {
   BedDouble, Bell, Building2, CalendarDays, ChartNoAxesCombined, Hotel,
   LayoutDashboard, Loader2, LogOut, Megaphone, Menu, QrCode, Settings,
-  Sparkles, Star, TrendingUp, Users, Wrench, X, Zap,
+  Sparkles, Star, TrendingUp, Users, Wrench, X, Zap, MoreHorizontal,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -31,6 +31,13 @@ const moreNavigation = [
   ["Staff", "/staff", Users],
   ["Notifications", "/notifications", Bell],
   ["Settings", "/settings", Settings],
+] as const;
+
+const mobileNavigation = [
+  ["Home", "/dashboard", LayoutDashboard],
+  ["Calendar", "/calendar", CalendarDays],
+  ["Occupancy", "/occupancy", ChartNoAxesCombined],
+  ["Revenue", "/revenue-manager", Sparkles],
 ] as const;
 
 const titles: Record<string, string> = {
@@ -272,6 +279,32 @@ export default function PersistentOSLayout({ children }: { children: ReactNode }
             {children}
           </div>
         </section>
+
+        <nav className={styles.mobileBottomNav} aria-label="Mobile navigation">
+          {mobileNavigation.map(([label, href, Icon]) => {
+            const active = pathname === href || pathname.startsWith(`${href}/`);
+            return (
+              <Link
+                key={href}
+                href={href}
+                className={active ? styles.mobileNavActive : ""}
+                aria-current={active ? "page" : undefined}
+              >
+                <Icon size={20} />
+                <span>{label}</span>
+              </Link>
+            );
+          })}
+          <button
+            type="button"
+            className={mobileOpen ? styles.mobileNavActive : ""}
+            onClick={() => setMobileOpen(true)}
+            aria-label="Open all features"
+          >
+            <MoreHorizontal size={21} />
+            <span>More</span>
+          </button>
+        </nav>
       </main>
     </OSLayoutProvider>
   );
