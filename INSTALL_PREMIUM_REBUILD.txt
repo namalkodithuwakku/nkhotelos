@@ -1,0 +1,42 @@
+N K HOTEL OS — PREMIUM REBUILD + CLEANUP
+
+1. Extract this ZIP into:
+   E:\NK Labs\NK Hotel OS
+
+2. Choose:
+   Replace files in the destination
+
+3. Run PowerShell:
+
+Set-Location "E:\NK Labs\NK Hotel OS"
+
+.\cleanup-old-dashboard.ps1
+
+npm run build
+
+4. If build succeeds:
+
+git add .
+git commit -m "Rebuild premium Hotel OS UI and remove legacy dashboard"
+git push origin main
+
+5. After Vercel shows Ready:
+   Open https://nkhotelos.vercel.app/?premium=1
+   Press Ctrl + Shift + R
+
+REMOVED FROM ACTIVE BUILD:
+- /legacy-dashboard route
+- Master/Supervisor/Team dashboard CSS imports
+- Old login CSS imports
+- WhatsApp and Staff Dashboard workspace CSS imports
+- Old home-premium and final-ui override chains
+- Obsolete install helper files
+
+PRESERVED:
+- Supabase login
+- Property data
+- Calendar component styles
+- Occupancy component styles
+- Revenue Manager component styles
+- Tools component styles
+- Core Operations pages and data

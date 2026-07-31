@@ -1,13 +1,17 @@
 "use client";
 
 import {
+  ArrowRight,
+  BedDouble,
   Bell,
   Building2,
+  CalendarCheck2,
   CalendarDays,
   ChartNoAxesCombined,
+  CheckCircle2,
+  Clock3,
   Eye,
   EyeOff,
-  FileChartColumn,
   Hotel,
   LayoutDashboard,
   Loader2,
@@ -19,6 +23,7 @@ import {
   ShieldCheck,
   Sparkles,
   Star,
+  TrendingUp,
   Users,
   Wrench,
   X,
@@ -46,7 +51,23 @@ type Property = {
   status: string;
 };
 
-const menu = [
+type Booking = {
+  id: string;
+  check_in: string;
+  check_out: string;
+  booking_status: string;
+};
+
+type ActionRow = {
+  id: string;
+  title: string;
+  module: string;
+  priority: string;
+  status: string;
+  due_date: string | null;
+};
+
+const navigation = [
   ["Dashboard", "/", LayoutDashboard],
   ["Booking Calendar", "/calendar", CalendarDays],
   ["Occupancy", "/occupancy", ChartNoAxesCombined],
@@ -58,13 +79,70 @@ const menu = [
   ["QR Menu", "/qr-menu", QrCode],
 ] as const;
 
-const moreMenu = [
-  ["Reports", "/reports", FileChartColumn],
+const moreNavigation = [
+  ["Reports", "/reports", TrendingUp],
   ["Property", "/property", Building2],
+  ["Rooms", "/rooms", BedDouble],
   ["Staff", "/staff", Users],
   ["Notifications", "/notifications", Bell],
   ["Settings", "/settings", Settings],
 ] as const;
+
+const modules = [
+  {
+    title: "Booking Calendar",
+    description: "Bookings, room blocks and availability in one clear view.",
+    href: "/calendar",
+    icon: CalendarDays,
+    tone: "cyan",
+    label: "OPERATIONS",
+  },
+  {
+    title: "Occupancy",
+    description: "Understand demand, availability and pickup instantly.",
+    href: "/occupancy",
+    icon: ChartNoAxesCombined,
+    tone: "sage",
+    label: "INSIGHT",
+  },
+  {
+    title: "Revenue Manager",
+    description: "See rate opportunities, peak days and revenue actions.",
+    href: "/revenue-manager",
+    icon: Sparkles,
+    tone: "gold",
+    label: "SMART MANAGER",
+  },
+  {
+    title: "Marketing Manager",
+    description: "Get practical marketing activities for weak periods.",
+    href: "/marketing-manager",
+    icon: Megaphone,
+    tone: "lavender",
+    label: "SMART MANAGER",
+  },
+  {
+    title: "Reputation Manager",
+    description: "Turn guest feedback into improvements and better responses.",
+    href: "/reputation-manager",
+    icon: Star,
+    tone: "rose",
+    label: "SMART MANAGER",
+  },
+  {
+    title: "Property & Rooms",
+    description: "Keep room types, rates, rooms and hotel details accurate.",
+    href: "/rooms",
+    icon: Building2,
+    tone: "orange",
+    label: "SETUP",
+  },
+] as const;
+
+function localDateKey(date = new Date()) {
+  const offset = date.getTimezoneOffset();
+  return new Date(date.getTime() - offset * 60_000).toISOString().slice(0, 10);
+}
 
 export default function Home() {
   const supabase = useMemo(() => createClient(), []);
@@ -72,18 +150,21 @@ export default function Home() {
   const [ready, setReady] = useState(false);
   const [signedIn, setSignedIn] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [mobile, setMobile] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const [profile, setProfile] = useState<Profile | null>(null);
   const [property, setProperty] = useState<Property | null>(null);
+  const [todayBookings, setTodayBookings] = useState<Booking[]>([]);
+  const [actions, setActions] = useState<ActionRow[]>([]);
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
 
   const [email, setEmail] = useState("nkhotelsup@gmail.com");
   const [password, setPassword] = useState("");
-  const [show, setShow] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
 
-  const loadAccount = useCallback(async () => {
+  const loadWorkspace = useCallback(async () => {
     setError("");
 
     const {
@@ -108,7 +189,7 @@ export default function Home() {
 
     if (!profileData?.is_active) {
       await supabase.auth.signOut();
-      setError("This OS account is not active.");
+      setError("This N K Hotel OS account is not active.");
       return;
     }
 
@@ -124,8 +205,40 @@ export default function Home() {
       return;
     }
 
+    if (!propertyData) {
+      setError("No assigned property was found.");
+      return;
+    }
+
+    const today = localDateKey();
+
+    const [bookingResult, actionResult, notificationResult] = await Promise.all([
+      supabase
+        .from("os_bookings")
+        .select("id,check_in,check_out,booking_status")
+        .eq("property_id", propertyData.id)
+        .lte("check_in", today)
+        .gte("check_out", today)
+        .not("booking_status", "in", '("cancelled","no_show")'),
+      supabase
+        .from("os_actions")
+        .select("id,title,module,priority,status,due_date")
+        .eq("property_id", propertyData.id)
+        .not("status", "in", '("completed","ignored","cancelled")')
+        .order("due_date", { ascending: true, nullsFirst: false })
+        .limit(8),
+      supabase
+        .from("os_notifications")
+        .select("id", { count: "exact", head: true })
+        .eq("property_id", propertyData.id)
+        .eq("status", "unread"),
+    ]);
+
     setProfile(profileData);
-    setProperty(propertyData ?? null);
+    setProperty(propertyData);
+    setTodayBookings((bookingResult.data ?? []) as Booking[]);
+    setActions((actionResult.data ?? []) as ActionRow[]);
+    setUnreadNotifications(notificationResult.count ?? 0);
     setSignedIn(true);
   }, [supabase]);
 
@@ -137,7 +250,7 @@ export default function Home() {
         data: { session },
       } = await supabase.auth.getSession();
 
-      if (session) await loadAccount();
+      if (session) await loadWorkspace();
       if (active) setReady(true);
     }
 
@@ -157,7 +270,7 @@ export default function Home() {
       active = false;
       subscription.unsubscribe();
     };
-  }, [loadAccount, supabase]);
+  }, [loadWorkspace, supabase]);
 
   async function signIn(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -177,7 +290,7 @@ export default function Home() {
     }
 
     setPassword("");
-    await loadAccount();
+    await loadWorkspace();
     setBusy(false);
   }
 
@@ -218,9 +331,9 @@ export default function Home() {
     return (
       <main className={styles.loginPage}>
         <section className={styles.loginCard}>
-          <div className={styles.brand}>
+          <div className={styles.loginBrand}>
             <span>
-              <Hotel size={24} />
+              <Hotel size={25} />
             </span>
             <div>
               <strong>
@@ -231,8 +344,9 @@ export default function Home() {
           </div>
 
           <div className={styles.loginTitle}>
+            <span>SMART HOTEL MANAGEMENT</span>
             <h1>Welcome back</h1>
-            <p>Sign in to manage your hotel.</p>
+            <p>Sign in to manage, understand and grow your hotel.</p>
           </div>
 
           <form onSubmit={signIn} className={styles.form}>
@@ -242,21 +356,26 @@ export default function Home() {
                 type="email"
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
+                autoComplete="email"
                 required
               />
             </label>
 
             <label>
               <span>Password</span>
-              <div className={styles.password}>
+              <div className={styles.passwordField}>
                 <input
-                  type={show ? "text" : "password"}
+                  type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
+                  autoComplete="current-password"
                   required
                 />
-                <button type="button" onClick={() => setShow((value) => !value)}>
-                  {show ? <EyeOff size={18} /> : <Eye size={18} />}
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((value) => !value)}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
             </label>
@@ -264,7 +383,7 @@ export default function Home() {
             {error ? <div className={styles.error}>{error}</div> : null}
             {notice ? <div className={styles.notice}>{notice}</div> : null}
 
-            <button className={styles.primary} disabled={busy}>
+            <button type="submit" className={styles.signInButton} disabled={busy}>
               {busy ? (
                 <Loader2 size={18} className={styles.spin} />
               ) : (
@@ -275,8 +394,9 @@ export default function Home() {
 
             <button
               type="button"
-              className={styles.linkButton}
+              className={styles.forgotButton}
               onClick={resetPassword}
+              disabled={busy}
             >
               Forgot password?
             </button>
@@ -286,53 +406,27 @@ export default function Home() {
     );
   }
 
-  const name = profile?.display_name || profile?.full_name || "Hotelier";
-
-  const cards = [
-    [
-      "Booking Calendar",
-      "Manage bookings and room availability.",
-      "/calendar",
-      CalendarDays,
-    ],
-    [
-      "Occupancy",
-      "View occupancy and available rooms.",
-      "/occupancy",
-      ChartNoAxesCombined,
-    ],
-    [
-      "Revenue Manager",
-      "Review rates and important dates.",
-      "/revenue-manager",
-      Sparkles,
-    ],
-    [
-      "Marketing Manager",
-      "See the best activities for the period.",
-      "/marketing-manager",
-      Megaphone,
-    ],
-    [
-      "Reputation Manager",
-      "Turn reviews into improvement actions.",
-      "/reputation-manager",
-      Star,
-    ],
-    [
-      "Property & Rooms",
-      "Manage hotel details and inventory.",
-      "/property",
-      Building2,
-    ],
-  ] as const;
+  const displayName = profile?.display_name || profile?.full_name || "Hotelier";
+  const today = localDateKey();
+  const arrivals = todayBookings.filter((booking) => booking.check_in === today).length;
+  const departures = todayBookings.filter((booking) => booking.check_out === today).length;
+  const occupied = todayBookings.filter(
+    (booking) => booking.check_in <= today && booking.check_out > today,
+  ).length;
+  const occupancy = property?.number_of_rooms
+    ? Math.min(100, Math.round((occupied / property.number_of_rooms) * 100))
+    : 0;
+  const priorityAction =
+    actions.find((action) => action.priority === "urgent") ||
+    actions.find((action) => action.priority === "high") ||
+    actions[0];
 
   return (
     <main className={styles.shell}>
-      <aside className={`${styles.sidebar} ${mobile ? styles.open : ""}`}>
-        <div className={styles.brand}>
+      <aside className={`${styles.sidebar} ${mobileOpen ? styles.sidebarOpen : ""}`}>
+        <div className={styles.sidebarBrand}>
           <span>
-            <Hotel size={21} />
+            <Hotel size={22} />
           </span>
           <div>
             <strong>
@@ -340,131 +434,250 @@ export default function Home() {
             </strong>
             <small>Simplifying Life</small>
           </div>
-          <button className={styles.close} onClick={() => setMobile(false)}>
+          <button type="button" onClick={() => setMobileOpen(false)}>
             <X size={19} />
           </button>
         </div>
 
-        <nav>
-          {menu.map(([label, href, Icon]) => (
+        <nav className={styles.nav}>
+          {navigation.map(([label, href, Icon]) => (
             <Link
               key={label}
               href={href}
-              className={label === "Dashboard" ? styles.active : ""}
-              onClick={() => setMobile(false)}
+              className={label === "Dashboard" ? styles.activeNav : ""}
+              onClick={() => setMobileOpen(false)}
             >
               <Icon size={18} />
-              {label}
+              <span>{label}</span>
             </Link>
           ))}
         </nav>
 
-        <p className={styles.heading} style={{ marginTop: 18 }}>
-          MORE
-        </p>
+        <p className={styles.moreLabel}>MANAGE</p>
 
-        <nav>
-          {moreMenu.map(([label, href, Icon]) => (
-            <Link
-              key={label}
-              href={href}
-              onClick={() => setMobile(false)}
-            >
+        <nav className={styles.nav}>
+          {moreNavigation.map(([label, href, Icon]) => (
+            <Link key={label} href={href} onClick={() => setMobileOpen(false)}>
               <Icon size={18} />
-              {label}
+              <span>{label}</span>
+              {label === "Notifications" && unreadNotifications > 0 ? (
+                <em>{unreadNotifications}</em>
+              ) : null}
             </Link>
           ))}
         </nav>
 
-        <footer>
-          <i>{name.charAt(0).toUpperCase()}</i>
+        <div className={styles.sidebarUser}>
+          <i>{displayName.charAt(0).toUpperCase()}</i>
           <div>
-            <strong>{name}</strong>
+            <strong>{displayName}</strong>
             <small>{profile?.platform_role || "Master"}</small>
           </div>
-          <button onClick={signOut}>
-            <LogOut size={18} />
+          <button type="button" onClick={signOut} title="Sign out">
+            <LogOut size={17} />
           </button>
-        </footer>
+        </div>
       </aside>
 
-      {mobile ? (
-        <button className={styles.backdrop} onClick={() => setMobile(false)} />
+      {mobileOpen ? (
+        <button
+          className={styles.backdrop}
+          type="button"
+          onClick={() => setMobileOpen(false)}
+        />
       ) : null}
 
       <section className={styles.main}>
-        <header>
-          <button className={styles.menu} onClick={() => setMobile(true)}>
+        <header className={styles.topbar}>
+          <button
+            type="button"
+            className={styles.menuButton}
+            onClick={() => setMobileOpen(true)}
+          >
             <Menu size={20} />
           </button>
 
-          <div>
-            <small>DASHBOARD</small>
-            <h1>Good day, {name}</h1>
+          <div className={styles.pageTitle}>
+            <span>HOTEL DASHBOARD</span>
+            <h1>Good day, {displayName}</h1>
           </div>
 
-          <div className={styles.hotel}>
+          <Link href="/property" className={styles.propertyChip}>
             <Building2 size={18} />
             <div>
-              <strong>{property?.hotel_name || "No property"}</strong>
+              <strong>{property?.hotel_name}</strong>
               <small>
-                {property
-                  ? `${property.hotel_code} • ${property.number_of_rooms} rooms`
-                  : "Not assigned"}
+                {property?.hotel_code} • {property?.number_of_rooms} rooms
               </small>
             </div>
-          </div>
+            <ArrowRight size={16} />
+          </Link>
         </header>
 
         <div className={styles.content}>
-          <section className={styles.welcome}>
-            <div>
-              <small>YOUR HOTEL TODAY</small>
-              <h2>{property?.hotel_name || "Complete property setup"}</h2>
+          <section className={styles.hero}>
+            <div className={styles.heroCopy}>
+              <span>YOUR HOTEL TODAY</span>
+              <h2>{property?.hotel_name}</h2>
               <p>
-                Manage bookings, occupancy and growth from one simple workspace.
+                Manage bookings, understand demand and take the next best action
+                from one simple workspace.
               </p>
+              <div className={styles.heroActions}>
+                <Link href="/calendar">
+                  <CalendarDays size={17} />
+                  Open calendar
+                </Link>
+                <Link href="/actions">
+                  <CheckCircle2 size={17} />
+                  View actions
+                </Link>
+              </div>
             </div>
-            <Link href="/property">Property settings</Link>
+
+            <div className={styles.heroScore}>
+              <small>OCCUPANCY TODAY</small>
+              <strong>{occupancy}%</strong>
+              <span>{occupied} of {property?.number_of_rooms} rooms occupied</span>
+            </div>
           </section>
 
           <section className={styles.metrics}>
-            <div>
-              <span>Rooms</span>
-              <strong>{property?.number_of_rooms ?? 0}</strong>
-              <small>Total inventory</small>
+            <Link href="/calendar" className={styles.metricCard}>
+              <span className={styles.cyanIcon}>
+                <CalendarCheck2 size={21} />
+              </span>
+              <div>
+                <small>ARRIVALS TODAY</small>
+                <strong>{arrivals}</strong>
+                <p>Expected check-ins</p>
+              </div>
+            </Link>
+
+            <Link href="/calendar" className={styles.metricCard}>
+              <span className={styles.roseIcon}>
+                <Clock3 size={21} />
+              </span>
+              <div>
+                <small>DEPARTURES TODAY</small>
+                <strong>{departures}</strong>
+                <p>Expected check-outs</p>
+              </div>
+            </Link>
+
+            <Link href="/actions" className={styles.metricCard}>
+              <span className={styles.goldIcon}>
+                <Zap size={21} />
+              </span>
+              <div>
+                <small>PENDING ACTIONS</small>
+                <strong>{actions.length}</strong>
+                <p>Need attention</p>
+              </div>
+            </Link>
+
+            <Link href="/notifications" className={styles.metricCard}>
+              <span className={styles.lavenderIcon}>
+                <Bell size={21} />
+              </span>
+              <div>
+                <small>NOTIFICATIONS</small>
+                <strong>{unreadNotifications}</strong>
+                <p>Unread alerts</p>
+              </div>
+            </Link>
+          </section>
+
+          <section className={styles.smartRow}>
+            <div className={styles.smartAction}>
+              <div className={styles.smartHeader}>
+                <span>
+                  <Sparkles size={19} />
+                </span>
+                <div>
+                  <small>SMART PRIORITY</small>
+                  <h3>Next best action</h3>
+                </div>
+              </div>
+
+              {priorityAction ? (
+                <div className={styles.actionBody}>
+                  <div>
+                    <span>{priorityAction.module}</span>
+                    <h4>{priorityAction.title}</h4>
+                    <p>
+                      Priority: {priorityAction.priority}
+                      {priorityAction.due_date
+                        ? ` • Due ${priorityAction.due_date}`
+                        : " • No due date"}
+                    </p>
+                  </div>
+                  <Link href="/actions">
+                    Open action <ArrowRight size={15} />
+                  </Link>
+                </div>
+              ) : (
+                <div className={styles.noAction}>
+                  <CheckCircle2 size={22} />
+                  <div>
+                    <h4>Everything is clear</h4>
+                    <p>No pending action is currently waiting.</p>
+                  </div>
+                </div>
+              )}
             </div>
-            <div>
-              <span>Currency</span>
-              <strong>{property?.currency || "LKR"}</strong>
-              <small>Property currency</small>
-            </div>
-            <div>
-              <span>Status</span>
-              <strong className={styles.green}>
-                {property?.status || "Active"}
-              </strong>
-              <small>OS access</small>
+
+            <div className={styles.quickPanel}>
+              <div>
+                <small>QUICK WORKSPACE</small>
+                <h3>Do the important work faster</h3>
+              </div>
+              <Link href="/calendar">
+                <CalendarDays size={18} />
+                New booking
+              </Link>
+              <Link href="/rooms">
+                <BedDouble size={18} />
+                Room status
+              </Link>
+              <Link href="/revenue-manager">
+                <TrendingUp size={18} />
+                Rate actions
+              </Link>
             </div>
           </section>
 
-          <div className={styles.heading}>
-            <h2>Main workspace</h2>
-            <p>Open only what you need.</p>
+          <div className={styles.sectionHeading}>
+            <div>
+              <span>MAIN WORKSPACE</span>
+              <h2>Everything your hotel needs</h2>
+            </div>
+            <p>Simple tools, clear insights and practical actions.</p>
           </div>
 
-          <section className={styles.grid}>
-            {cards.map(([title, description, href, Icon]) => (
-              <Link key={title} href={href} className={styles.card}>
-                <span>
-                  <Icon size={21} />
-                </span>
-                <div>
-                  <h3>{title}</h3>
-                  <p>{description}</p>
-                </div>
-              </Link>
-            ))}
+          <section className={styles.moduleGrid}>
+            {modules.map((module) => {
+              const Icon = module.icon;
+              return (
+                <Link
+                  href={module.href}
+                  key={module.title}
+                  className={`${styles.moduleCard} ${styles[module.tone]}`}
+                >
+                  <div className={styles.moduleTop}>
+                    <span>
+                      <Icon size={22} />
+                    </span>
+                    <small>{module.label}</small>
+                  </div>
+                  <h3>{module.title}</h3>
+                  <p>{module.description}</p>
+                  <div className={styles.moduleOpen}>
+                    Open module <ArrowRight size={15} />
+                  </div>
+                </Link>
+              );
+            })}
           </section>
         </div>
       </section>

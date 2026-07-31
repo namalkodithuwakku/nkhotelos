@@ -3,28 +3,25 @@
   display: grid;
   place-items: center;
   color: #ef7d00;
-  background:
-    radial-gradient(circle at top right, rgba(179,131,214,.08), transparent 30%),
-    #f4f6f8;
+  background: #f3f5f7;
 }
 
 .spinner {
-  animation: os-shell-spin .8s linear infinite;
+  animation: shell-spin .8s linear infinite;
 }
 
-@keyframes os-shell-spin {
+@keyframes shell-spin {
   to { transform: rotate(360deg); }
 }
 
 .shell {
   min-height: 100vh;
   display: grid;
-  grid-template-columns: 244px minmax(0, 1fr);
+  grid-template-columns: 250px minmax(0,1fr);
   color: #20252b;
   background:
-    radial-gradient(circle at top right, rgba(179,131,214,.05), transparent 30%),
-    radial-gradient(circle at bottom left, rgba(77,182,198,.05), transparent 35%),
-    #f4f6f8;
+    radial-gradient(circle at top right, rgba(180,132,218,.05), transparent 30%),
+    #f3f5f7;
 }
 
 .sidebar {
@@ -35,10 +32,11 @@
   display: flex;
   flex-direction: column;
   padding: 18px 14px;
-  background: rgba(255,255,255,.94);
-  border-right: 1px solid #e5e8eb;
-  box-shadow: 12px 0 30px rgba(26,32,39,.03);
-  backdrop-filter: blur(16px);
+  color: #fff;
+  background:
+    radial-gradient(circle at top left, rgba(239,125,0,.12), transparent 24%),
+    linear-gradient(180deg, #242a30 0%, #181d22 100%);
+  box-shadow: 16px 0 40px rgba(20,25,30,.08);
   overflow-y: auto;
 }
 
@@ -46,35 +44,35 @@
   display: flex;
   align-items: center;
   gap: 11px;
-  padding: 3px 5px 20px;
+  padding: 3px 5px 22px;
 }
 
 .logo {
-  width: 42px;
-  height: 42px;
+  width: 43px;
+  height: 43px;
   display: grid;
   place-items: center;
   flex: 0 0 auto;
   color: #fff;
-  background: linear-gradient(145deg, #ff9b2d 0%, #ef7d00 70%);
+  background: linear-gradient(145deg, #ff9d31, #ef7d00);
   border-radius: 13px;
-  box-shadow: 0 10px 22px rgba(239,125,0,.22);
+  box-shadow: 0 12px 25px rgba(239,125,0,.24);
 }
 
 .brand strong {
   display: block;
-  color: #20252b;
-  font-size: 15px;
+  color: #fff;
+  font-size: 16px;
 }
 
 .brand strong b {
-  color: #ef7d00;
+  color: #ff9a2c;
 }
 
 .brand small {
   display: block;
-  margin-top: 3px;
-  color: #80878d;
+  margin-top: 4px;
+  color: rgba(255,255,255,.46);
   font-size: 10px;
 }
 
@@ -89,37 +87,38 @@
   align-items: center;
   gap: 11px;
   padding: 0 11px;
-  color: #5d656d !important;
+  color: rgba(255,255,255,.66) !important;
   background: transparent !important;
-  border-radius: 11px;
+  border-radius: 10px;
   font-size: 12px;
-  font-weight: 760;
+  font-weight: 740;
   transition: .16s ease;
 }
 
 .sidebar nav a:hover {
-  color: #20252b !important;
-  background: #f3f5f6 !important;
+  color: #fff !important;
+  background: rgba(255,255,255,.06) !important;
   transform: translateX(2px);
 }
 
 .sidebar nav .active {
-  color: #d96f00 !important;
-  background: linear-gradient(135deg, #fff3e5, #fff8ef) !important;
-  box-shadow: inset 3px 0 0 #ef7d00;
+  color: #fff !important;
+  background: linear-gradient(135deg, rgba(239,125,0,.30), rgba(239,125,0,.13)) !important;
+  box-shadow: inset 3px 0 0 #ff9a2c;
 }
 
 .moreLabel {
   margin: 20px 11px 8px;
-  color: #9aa0a5;
+  color: rgba(255,255,255,.28);
   font-size: 9px;
   font-weight: 900;
-  letter-spacing: .14em;
+  letter-spacing: .15em;
 }
 
 .sidebarBottom {
   margin-top: auto;
   padding-top: 16px;
+  border-top: 1px solid rgba(255,255,255,.08);
 }
 
 .sidebarBottom button {
@@ -129,8 +128,8 @@
   align-items: center;
   gap: 9px;
   padding: 0 11px;
-  color: #6b737a !important;
-  background: #f5f6f7 !important;
+  color: rgba(255,255,255,.66) !important;
+  background: rgba(255,255,255,.06) !important;
   border: 0;
   border-radius: 10px;
   font-size: 12px;
@@ -148,7 +147,7 @@
   gap: 11px;
   padding: 13px 25px;
   background: rgba(255,255,255,.92);
-  border-bottom: 1px solid #e5e8eb;
+  border-bottom: 1px solid #e5e9ec;
   backdrop-filter: blur(14px);
 }
 
@@ -165,7 +164,6 @@
   margin: 4px 0 0;
   color: #20252b;
   font-size: 21px;
-  line-height: 1.2;
   letter-spacing: -.025em;
 }
 
@@ -177,7 +175,7 @@
   place-items: center;
   flex: 0 0 auto;
   color: #4f575f !important;
-  background: #f2f4f5 !important;
+  background: #f1f3f4 !important;
   border: 0;
   border-radius: 10px;
 }
@@ -207,8 +205,8 @@
 
   .sidebar {
     position: fixed;
-    left: -260px;
-    width: 244px;
+    left: -270px;
+    width: 250px;
     transition: left .2s ease;
   }
 
@@ -225,8 +223,8 @@
     width: 31px;
     height: 31px;
     place-items: center;
-    color: #555d64 !important;
-    background: #f2f3f4 !important;
+    color: rgba(255,255,255,.72) !important;
+    background: rgba(255,255,255,.07) !important;
     border: 0;
     border-radius: 9px;
   }
@@ -236,7 +234,7 @@
     inset: 0;
     z-index: 30;
     display: block;
-    background: rgba(17,24,32,.38);
+    background: rgba(14,18,22,.42);
     border: 0;
   }
 
