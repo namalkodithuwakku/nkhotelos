@@ -1,38 +1,15 @@
 "use client";
 
 import {
-  BedDouble,
-  Bell,
-  Building2,
-  CalendarDays,
-  ChartNoAxesCombined,
-  ChevronRight,
-  Hotel,
-  LayoutDashboard,
-  Loader2,
-  LogOut,
-  Megaphone,
-  Menu,
-  QrCode,
-  Settings,
-  Sparkles,
-  Star,
-  TrendingUp,
-  Users,
-  Wrench,
-  X,
-  Zap,
+  BedDouble, Bell, Building2, CalendarDays, ChartNoAxesCombined, Hotel,
+  LayoutDashboard, Loader2, LogOut, Megaphone, Menu, QrCode, Settings,
+  Sparkles, Star, TrendingUp, Users, Wrench, X, Zap,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import {
-  ReactNode,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { createClient } from "../../lib/supabase/client";
+import { OSLayoutProvider } from "./OSLayoutContext";
 import styles from "./PersistentOSLayout.module.css";
 
 const navigation = [
@@ -74,31 +51,22 @@ const titles: Record<string, string> = {
   "/settings": "Settings",
 };
 
-export default function PersistentOSLayout({
-  children,
-}: {
-  children: ReactNode;
-}) {
+export default function PersistentOSLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const supabase = useMemo(() => createClient(), []);
-
   const [ready, setReady] = useState(false);
   const [desktopOpen, setDesktopOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [name, setName] = useState("Hotelier");
   const [role, setRole] = useState("Master");
-
   const closeTimer = useRef<number | null>(null);
 
   useEffect(() => {
     let active = true;
 
     async function load() {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-
+      const { data: { session } } = await supabase.auth.getSession();
       if (!active) return;
 
       if (!session) {
@@ -127,28 +95,26 @@ export default function PersistentOSLayout({
 
     void load();
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!session) router.replace("/login");
-    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        if (!session) router.replace("/login");
+      },
+    );
 
     return () => {
       active = false;
       subscription.unsubscribe();
-
       if (closeTimer.current !== null) {
         window.clearTimeout(closeTimer.current);
       }
     };
   }, [router, supabase]);
 
-  function openDesktopSidebar() {
+  function openDesktopMenu() {
     if (closeTimer.current !== null) {
       window.clearTimeout(closeTimer.current);
       closeTimer.current = null;
     }
-
     setDesktopOpen(true);
   }
 
@@ -156,19 +122,17 @@ export default function PersistentOSLayout({
     if (closeTimer.current !== null) {
       window.clearTimeout(closeTimer.current);
     }
-
     closeTimer.current = window.setTimeout(() => {
       setDesktopOpen(false);
       closeTimer.current = null;
     }, 180);
   }
 
-  function closeDesktopImmediately() {
+  function closeDesktopMenu() {
     if (closeTimer.current !== null) {
       window.clearTimeout(closeTimer.current);
       closeTimer.current = null;
     }
-
     setDesktopOpen(false);
   }
 
@@ -185,13 +149,9 @@ export default function PersistentOSLayout({
     );
   }
 
-  const renderLinks = (
-    items: typeof navigation | typeof moreNavigation,
-  ) =>
+  const renderLinks = (items: typeof navigation | typeof moreNavigation) =>
     items.map(([label, href, Icon]) => {
-      const active =
-        pathname === href || pathname.startsWith(`${href}/`);
-
+      const active = pathname === href || pathname.startsWith(`${href}/`);
       return (
         <Link
           key={href}
@@ -199,7 +159,7 @@ export default function PersistentOSLayout({
           className={active ? styles.active : ""}
           onClick={() => {
             setMobileOpen(false);
-            closeDesktopImmediately();
+            closeDesktopMenu();
           }}
         >
           <Icon size={18} />
@@ -208,122 +168,111 @@ export default function PersistentOSLayout({
       );
     });
 
+  const compact =
+    pathname === "/calendar" ||
+    pathname === "/occupancy" ||
+    pathname === "/revenue-manager";
+
   return (
-    <main className={styles.shell}>
-      <div
-        className={styles.desktopHoverZone}
-        onMouseEnter={openDesktopSidebar}
-        aria-hidden="true"
-      />
+    <OSLayoutProvider>
+      <main className={styles.shell}>
+        <div
+          className={styles.hoverZone}
+          onMouseEnter={openDesktopMenu}
+          aria-hidden="true"
+        />
 
-      <button
-        type="button"
-        className={`${styles.menuClip} ${
-          desktopOpen ? styles.menuClipOpen : ""
-        }`}
-        onMouseEnter={openDesktopSidebar}
-        onMouseLeave={scheduleDesktopClose}
-        onFocus={openDesktopSidebar}
-        onBlur={scheduleDesktopClose}
-        aria-label="Open menu"
-        title="Move cursor here to open menu"
-      >
-        <span />
-        <ChevronRight size={17} />
-      </button>
-
-      <aside
-        className={`${styles.sidebar} ${
-          desktopOpen ? styles.desktopOpen : ""
-        } ${mobileOpen ? styles.mobileOpen : ""}`}
-        onMouseEnter={openDesktopSidebar}
-        onMouseLeave={scheduleDesktopClose}
-      >
-        <div className={styles.brand}>
-          <span>
-            <Hotel size={22} />
-          </span>
-
-          <div>
-            <strong>
-              N K Hotel <b>OS</b>
-            </strong>
-            <small>Simplifying Life</small>
-          </div>
-
-          <button
-            type="button"
-            className={styles.mobileClose}
-            onClick={() => setMobileOpen(false)}
-            aria-label="Close menu"
-          >
-            <X size={19} />
-          </button>
-        </div>
-
-        <nav>{renderLinks(navigation)}</nav>
-
-        <p className={styles.sectionLabel}>MANAGE</p>
-
-        <nav>{renderLinks(moreNavigation)}</nav>
-
-        <div className={styles.user}>
-          <i>{name.charAt(0).toUpperCase()}</i>
-
-          <div>
-            <strong>{name}</strong>
-            <small>{role}</small>
-          </div>
-
-          <button
-            type="button"
-            onClick={signOut}
-            title="Sign out"
-            aria-label="Sign out"
-          >
-            <LogOut size={17} />
-          </button>
-        </div>
-      </aside>
-
-      {mobileOpen ? (
         <button
           type="button"
-          className={styles.backdrop}
-          onClick={() => setMobileOpen(false)}
-          aria-label="Close menu"
-        />
-      ) : null}
+          className={`${styles.menuClip} ${desktopOpen ? styles.clipHidden : ""}`}
+          onMouseEnter={openDesktopMenu}
+          onFocus={openDesktopMenu}
+          aria-label="Open menu"
+        >
+          <span>MENU</span>
+          <b>›</b>
+        </button>
 
-      <section className={styles.main}>
-        <header>
+        <aside
+          className={`${styles.sidebar} ${desktopOpen ? styles.desktopOpen : ""} ${
+            mobileOpen ? styles.mobileOpen : ""
+          }`}
+          onMouseEnter={openDesktopMenu}
+          onMouseLeave={scheduleDesktopClose}
+        >
           <button
             type="button"
-            className={styles.mobileMenu}
-            onClick={() => setMobileOpen(true)}
-            aria-label="Open menu"
+            className={styles.closeClip}
+            onClick={closeDesktopMenu}
+            onMouseEnter={openDesktopMenu}
+            aria-label="Close menu"
           >
-            <Menu size={20} />
+            <span>CLOSE</span>
+            <b>‹</b>
           </button>
 
-          <div>
-            <small>N K HOTEL OS</small>
-            <h1>{titles[pathname] || "Hotel OS"}</h1>
+          <div className={styles.brand}>
+            <span><Hotel size={22} /></span>
+            <div>
+              <strong>N K Hotel <b>OS</b></strong>
+              <small>Simplifying Life</small>
+            </div>
+            <button
+              type="button"
+              className={styles.mobileClose}
+              onClick={() => setMobileOpen(false)}
+              aria-label="Close menu"
+            >
+              <X size={19} />
+            </button>
           </div>
-        </header>
 
-        <div
-          className={
-            pathname === "/calendar" ||
-            pathname === "/occupancy" ||
-            pathname === "/revenue-manager"
-              ? styles.compact
-              : styles.content
-          }
-        >
-          {children}
-        </div>
-      </section>
-    </main>
+          <nav>{renderLinks(navigation)}</nav>
+          <p className={styles.sectionLabel}>MANAGE</p>
+          <nav>{renderLinks(moreNavigation)}</nav>
+
+          <div className={styles.user}>
+            <i>{name.charAt(0).toUpperCase()}</i>
+            <div>
+              <strong>{name}</strong>
+              <small>{role}</small>
+            </div>
+            <button type="button" onClick={signOut} title="Sign out">
+              <LogOut size={17} />
+            </button>
+          </div>
+        </aside>
+
+        {mobileOpen ? (
+          <button
+            type="button"
+            className={styles.backdrop}
+            onClick={() => setMobileOpen(false)}
+            aria-label="Close menu"
+          />
+        ) : null}
+
+        <section className={styles.main}>
+          <header>
+            <button
+              type="button"
+              className={styles.mobileMenu}
+              onClick={() => setMobileOpen(true)}
+              aria-label="Open menu"
+            >
+              <Menu size={20} />
+            </button>
+            <div>
+              <small>N K HOTEL OS</small>
+              <h1>{titles[pathname] || "Hotel OS"}</h1>
+            </div>
+          </header>
+
+          <div className={compact ? styles.compact : styles.content}>
+            {children}
+          </div>
+        </section>
+      </main>
+    </OSLayoutProvider>
   );
 }
