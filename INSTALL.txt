@@ -1,46 +1,41 @@
-N K HOTEL OS — CALENDAR FIT + PREMIUM UI UPDATE
+N K HOTEL OS - SOFT CALENDAR COLOR UPDATE
 
-CHANGES
+This update changes only the booking-source colors.
 
-- Removes Direct from the booking source dropdown.
-- FIT becomes the default for all direct inquiries.
-- Converts existing Direct labels to FIT in the interface.
-- Includes SQL to convert existing Direct booking rows to FIT.
-- Gives FIT and Travel Agent clearly different colors.
-- Adds a reliable Lucide close icon to booking modals.
-- Clicking outside the Add/Edit Booking modal closes it.
-- Removes horizontal scrolling from the booking window.
-- Makes the booking modal responsive and premium.
-- Improves selected room chips.
-- Adds a sticky Save/Cancel footer.
-- Improves Booking.com, Agoda, Airbnb, Expedia, FIT, Travel Agent and Block colors.
+Final colors:
+
+FIT            - soft golden yellow
+Booking.com    - soft blue
+Expedia        - muted orange
+Agoda          - soft purple
+Airbnb         - muted rose
+Travel Agent   - soft green
+Blocked        - muted charcoal purple
 
 INSTALL
 
-1. Extract into:
+1. Extract this ZIP into:
 
 E:\NK Labs\NK Hotel OS
 
-2. Run the SQL file in Supabase SQL Editor:
-
-supabase\NK_Hotel_OS_Convert_Direct_To_FIT.sql
-
-3. Run PowerShell:
+2. Run:
 
 Set-Location "E:\NK Labs\NK Hotel OS"
 
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 
-.\install-calendar-fit-premium-ui.ps1
+.\install-soft-calendar-colors.ps1
 
-4. Build:
+3. Build:
 
 Remove-Item ".next" -Recurse -Force -ErrorAction SilentlyContinue
 
 npm run build
 
-5. Push:
+4. Push:
 
-git add "app/components/calendar" "app/api/calendar/bookings/route.ts" "app/**/*.css" "supabase/NK_Hotel_OS_Convert_Direct_To_FIT.sql"
-git commit -m "Upgrade calendar booking UI and standardize FIT source"
+git add .
+git commit -m "Apply soft booking colors to calendar"
 git push origin main
+
+After the script runs successfully, it can be deleted.

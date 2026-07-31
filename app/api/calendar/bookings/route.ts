@@ -11,6 +11,14 @@ type Room = {
   room_type: { name?: string } | { name?: string }[] | null;
 };
 
+function todayInSriLanka() {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Colombo",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
+}
 type Existing = {
   id: string;
   room_id: string;
@@ -151,7 +159,22 @@ export async function POST(request: NextRequest) {
     const names = requestedRoomNames(input);
     const checkIn = String(input.check_in || "");
     const checkOut = String(input.check_out || "");
+
+    if (checkIn < todayInSriLanka()) {
+      return NextResponse.json(
+        { error: "Past dates are locked. A booking cannot be moved into the past." },
+        { status: 400 },
+      );
+    }
     const isBlock = input.action === "block";
+    const today = todayInSriLanka();
+
+    if (checkIn < today) {
+      return NextResponse.json(
+        { error: "Past dates are locked. New bookings can start from today." },
+        { status: 400 },
+      );
+    }
 
     if (
       !propertyId ||
@@ -370,6 +393,13 @@ export async function PATCH(request: NextRequest) {
     const checkIn = String(input.check_in || "");
     const checkOut = String(input.check_out || "");
 
+    if (checkIn < todayInSriLanka()) {
+      return NextResponse.json(
+        { error: "Past dates are locked. A booking cannot be moved into the past." },
+        { status: 400 },
+      );
+    }
+
     if (
       !names.length ||
       !String(input.guest_name || "").trim() ||
@@ -527,4 +557,5 @@ export async function DELETE(request: NextRequest) {
     );
   }
 }
+
 
