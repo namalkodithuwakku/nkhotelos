@@ -20,63 +20,63 @@ $styles = @{
     "fit" = @'
 .calendar-booking.fit{
   background:
-    radial-gradient(circle at 18% 20%,rgba(255,255,255,.34),transparent 34%),
-    linear-gradient(135deg,#EBC267,#E2A843)!important;
-  border-color:#D39B38!important;
-  color:#46340F!important;
+    radial-gradient(circle at 18% 18%,rgba(255,255,255,.24),transparent 32%),
+    linear-gradient(135deg,#E6BB3D,#D9A922)!important;
+  border-color:#C99718!important;
+  color:#2D291C!important;
 }
 '@
     "booking" = @'
 .calendar-booking.booking{
   background:
-    radial-gradient(circle at 18% 20%,rgba(255,255,255,.22),transparent 34%),
-    linear-gradient(135deg,#78BBC0,#5AA8AE)!important;
-  border-color:#4F979D!important;
+    radial-gradient(circle at 18% 18%,rgba(255,255,255,.16),transparent 32%),
+    linear-gradient(135deg,#3778BE,#2D68AD)!important;
+  border-color:#285C98!important;
   color:#FFFFFF!important;
 }
 '@
     "expedia" = @'
 .calendar-booking.expedia{
   background:
-    radial-gradient(circle at 18% 20%,rgba(255,255,255,.20),transparent 34%),
-    linear-gradient(135deg,#E29559,#D47C37)!important;
-  border-color:#C76D2D!important;
+    radial-gradient(circle at 18% 18%,rgba(255,255,255,.14),transparent 32%),
+    linear-gradient(135deg,#EA8A34,#DE7721)!important;
+  border-color:#CA6919!important;
   color:#FFFFFF!important;
 }
 '@
     "agoda" = @'
 .calendar-booking.agoda{
   background:
-    radial-gradient(circle at 18% 20%,rgba(255,255,255,.18),transparent 34%),
-    linear-gradient(135deg,#AD6A9C,#965388)!important;
-  border-color:#844776!important;
+    radial-gradient(circle at 18% 18%,rgba(255,255,255,.12),transparent 32%),
+    linear-gradient(135deg,#8B7258,#786148)!important;
+  border-color:#69543E!important;
   color:#FFFFFF!important;
 }
 '@
     "airbnb" = @'
 .calendar-booking.airbnb{
   background:
-    radial-gradient(circle at 18% 20%,rgba(255,255,255,.18),transparent 34%),
-    linear-gradient(135deg,#BF6B63,#A95049)!important;
-  border-color:#98453F!important;
+    radial-gradient(circle at 18% 18%,rgba(255,255,255,.13),transparent 32%),
+    linear-gradient(135deg,#D15A7F,#C1496F)!important;
+  border-color:#AD3F61!important;
   color:#FFFFFF!important;
 }
 '@
     "agent" = @'
 .calendar-booking.agent{
   background:
-    radial-gradient(circle at 18% 20%,rgba(255,255,255,.18),transparent 34%),
-    linear-gradient(135deg,#8AA460,#708B4C)!important;
-  border-color:#60783E!important;
+    radial-gradient(circle at 18% 18%,rgba(255,255,255,.13),transparent 32%),
+    linear-gradient(135deg,#2F936B,#257F5A)!important;
+  border-color:#1F6E4E!important;
   color:#FFFFFF!important;
 }
 '@
     "blocked" = @'
 .calendar-booking.blocked{
   background:
-    radial-gradient(circle at 18% 20%,rgba(255,255,255,.12),transparent 34%),
-    linear-gradient(135deg,#716278,#5B4C63)!important;
-  border-color:#4C3F53!important;
+    radial-gradient(circle at 18% 18%,rgba(255,255,255,.10),transparent 32%),
+    linear-gradient(135deg,#606A72,#4F5961)!important;
+  border-color:#444C53!important;
   color:#FFFFFF!important;
 }
 '@
@@ -99,13 +99,13 @@ foreach ($name in $styles.Keys) {
 }
 
 $legend = @{
-    "fit" = "#E5B455"
-    "booking" = "#68ADB3"
-    "expedia" = "#D88440"
-    "agoda" = "#A15D90"
-    "airbnb" = "#B45A52"
-    "agent" = "#7C9653"
-    "blocked" = "#63546B"
+    "fit" = "#DDAE2A"
+    "booking" = "#2F6FB6"
+    "expedia" = "#E57E25"
+    "agoda" = "#80674E"
+    "airbnb" = "#C84D74"
+    "agent" = "#26865E"
+    "blocked" = "#525B63"
 }
 
 foreach ($name in $legend.Keys) {
@@ -125,30 +125,29 @@ foreach ($name in $legend.Keys) {
     }
 }
 
-# Slightly soften booking shadows without changing layout.
-$shadowBlock = @'
+$polish = @'
 
-/* N K HOTEL OS SOFT AURORA BOOKING POLISH */
+/* N K HOTEL OS - NKH DASHBOARD BOOKING PALETTE */
 .calendar-booking{
   box-shadow:
-    0 2px 5px rgba(28,47,58,.10),
-    inset 0 1px 0 rgba(255,255,255,.15)!important;
+    0 3px 7px rgba(27,48,61,.13),
+    inset 0 1px 0 rgba(255,255,255,.12)!important;
 }
 .calendar-booking strong{
   font-weight:800!important;
 }
 .calendar-booking small{
-  opacity:.86!important;
+  opacity:.88!important;
 }
 '@
 
-if ($content -notmatch 'N K HOTEL OS SOFT AURORA BOOKING POLISH') {
-    $content += $shadowBlock
+if ($content -notmatch 'N K HOTEL OS - NKH DASHBOARD BOOKING PALETTE') {
+    $content += $polish
 }
 
 Set-Content -LiteralPath $cssFile.FullName -Value $content -Encoding UTF8
 
 Write-Host ""
-Write-Host "Soft Aurora Calendar colors installed successfully." -ForegroundColor Green
+Write-Host "NKH Dashboard calendar palette installed successfully." -ForegroundColor Green
 Write-Host "Updated stylesheet: $($cssFile.FullName)" -ForegroundColor Cyan
 Write-Host ""

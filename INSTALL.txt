@@ -1,18 +1,18 @@
-N K HOTEL OS - SOFT AURORA CALENDAR COLORS
+N K HOTEL OS - NKH DASHBOARD CALENDAR COLORS
 
-This update changes only Calendar booking colors and shadows.
+This update changes only Calendar booking-source colors.
 
 PALETTE
 
-FIT            - warm golden yellow with charcoal text
-Booking.com    - muted teal blue
-Expedia        - soft burnt orange
-Agoda          - dusty purple
+FIT            - mustard gold
+Booking.com    - deep muted blue
+Expedia        - warm burnt orange
+Agoda          - earthy taupe brown
 Airbnb         - muted rose
-Travel Agent   - olive green
-Blocked        - charcoal plum
+Travel Agent   - deep green
+Blocked        - dark charcoal
 
-A subtle aurora highlight is added to the upper-left of each booking card.
+A subtle highlight remains on each booking card.
 
 INSTALL
 
@@ -26,7 +26,7 @@ Set-Location "E:\NK Labs\NK Hotel OS"
 
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 
-.\install-soft-aurora-calendar-colors.ps1
+.\install-nkh-dashboard-calendar-colors.ps1
 
 3. Build:
 
@@ -37,7 +37,7 @@ npm run build
 4. Push:
 
 git add .
-git commit -m "Apply soft aurora colors to calendar bookings"
+git commit -m "Apply NKH Dashboard booking colors to Hotel OS calendar"
 git push origin main
 
 After the script runs successfully, it can be deleted.
