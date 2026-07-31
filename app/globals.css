@@ -1,27 +1,18 @@
-@import "tailwindcss";
-
-
-/* Dashboards */
+/* Existing Staff Dashboard styles */
 @import "./styles/dashboards/master.css";
 @import "./styles/dashboards/supervisor.css";
 @import "./styles/dashboards/team.css";
-
-/* Base */
 @import "./styles/base/reset.css";
 @import "./styles/base/variables.css";
 @import "./styles/base/light.css";
 @import "./styles/base/dark.css";
 @import "./styles/base/typography.css";
 @import "./styles/base/animations.css";
-
-/* Layout */
 @import "./styles/layout/app.css";
 @import "./styles/layout/sidebar.css";
 @import "./styles/layout/header.css";
 @import "./styles/layout/workspace.css";
 @import "./styles/layout/responsive.css";
-
-/* Components */
 @import "./styles/components/cards.css";
 @import "./styles/components/buttons.css";
 @import "./styles/components/forms.css";
@@ -64,3 +55,5 @@
 @import "./styles/pwa-mobile.css";
 @import "./styles/nkh-premium-ui.css";
 
+/* Keep Tailwind last so old styles do not override utility classes */
+@import "tailwindcss";
