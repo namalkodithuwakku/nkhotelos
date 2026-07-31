@@ -3,7 +3,9 @@
   display: grid;
   place-items: center;
   color: #ef7d00;
-  background: #f4f5f6;
+  background:
+    radial-gradient(circle at top right, rgba(179,131,214,.08), transparent 30%),
+    #f4f6f8;
 }
 
 .spinner {
@@ -17,9 +19,12 @@
 .shell {
   min-height: 100vh;
   display: grid;
-  grid-template-columns: 232px minmax(0, 1fr);
+  grid-template-columns: 244px minmax(0, 1fr);
   color: #20252b;
-  background: #f4f5f6;
+  background:
+    radial-gradient(circle at top right, rgba(179,131,214,.05), transparent 30%),
+    radial-gradient(circle at bottom left, rgba(77,182,198,.05), transparent 35%),
+    #f4f6f8;
 }
 
 .sidebar {
@@ -29,28 +34,31 @@
   height: 100vh;
   display: flex;
   flex-direction: column;
-  padding: 17px 13px;
-  background: #fff;
-  border-right: 1px solid #e5e7e9;
+  padding: 18px 14px;
+  background: rgba(255,255,255,.94);
+  border-right: 1px solid #e5e8eb;
+  box-shadow: 12px 0 30px rgba(26,32,39,.03);
+  backdrop-filter: blur(16px);
   overflow-y: auto;
 }
 
 .brand {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 2px 4px 18px;
+  gap: 11px;
+  padding: 3px 5px 20px;
 }
 
 .logo {
-  width: 39px;
-  height: 39px;
+  width: 42px;
+  height: 42px;
   display: grid;
   place-items: center;
   flex: 0 0 auto;
   color: #fff;
-  background: #ef7d00;
-  border-radius: 11px;
+  background: linear-gradient(145deg, #ff9b2d 0%, #ef7d00 70%);
+  border-radius: 13px;
+  box-shadow: 0 10px 22px rgba(239,125,0,.22);
 }
 
 .brand strong {
@@ -72,34 +80,37 @@
 
 .sidebar nav {
   display: grid;
-  gap: 3px;
+  gap: 4px;
 }
 
 .sidebar nav a {
-  min-height: 40px;
+  min-height: 43px;
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 0 10px;
+  gap: 11px;
+  padding: 0 11px;
   color: #5d656d !important;
   background: transparent !important;
-  border-radius: 8px;
+  border-radius: 11px;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 760;
+  transition: .16s ease;
 }
 
 .sidebar nav a:hover {
   color: #20252b !important;
-  background: #f5f5f3 !important;
+  background: #f3f5f6 !important;
+  transform: translateX(2px);
 }
 
 .sidebar nav .active {
-  color: #ef7d00 !important;
-  background: #fff3e5 !important;
+  color: #d96f00 !important;
+  background: linear-gradient(135deg, #fff3e5, #fff8ef) !important;
+  box-shadow: inset 3px 0 0 #ef7d00;
 }
 
 .moreLabel {
-  margin: 18px 10px 7px;
+  margin: 20px 11px 8px;
   color: #9aa0a5;
   font-size: 9px;
   font-weight: 900;
@@ -108,20 +119,20 @@
 
 .sidebarBottom {
   margin-top: auto;
-  padding-top: 15px;
+  padding-top: 16px;
 }
 
 .sidebarBottom button {
   width: 100%;
-  min-height: 39px;
+  min-height: 41px;
   display: flex;
   align-items: center;
   gap: 9px;
-  padding: 0 10px;
+  padding: 0 11px;
   color: #6b737a !important;
-  background: #f5f6f6 !important;
+  background: #f5f6f7 !important;
   border: 0;
-  border-radius: 8px;
+  border-radius: 10px;
   font-size: 12px;
   font-weight: 800;
 }
@@ -131,13 +142,14 @@
 }
 
 .header {
-  min-height: 70px;
+  min-height: 78px;
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 11px 22px;
-  background: #fff;
-  border-bottom: 1px solid #e5e7e9;
+  gap: 11px;
+  padding: 13px 25px;
+  background: rgba(255,255,255,.92);
+  border-bottom: 1px solid #e5e8eb;
+  backdrop-filter: blur(14px);
 }
 
 .header small {
@@ -145,28 +157,29 @@
   color: #ef7d00;
   font-size: 9px;
   font-weight: 900;
-  letter-spacing: .13em;
+  letter-spacing: .14em;
   text-transform: uppercase;
 }
 
 .header h1 {
-  margin: 3px 0 0;
+  margin: 4px 0 0;
   color: #20252b;
-  font-size: 20px;
+  font-size: 21px;
   line-height: 1.2;
+  letter-spacing: -.025em;
 }
 
 .back,
 .menu {
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
   display: grid;
   place-items: center;
   flex: 0 0 auto;
   color: #4f575f !important;
-  background: #f3f4f4 !important;
+  background: #f2f4f5 !important;
   border: 0;
-  border-radius: 8px;
+  border-radius: 10px;
 }
 
 .menu,
@@ -176,11 +189,11 @@
 }
 
 .content {
-  padding: 18px 22px 34px;
+  padding: 22px 25px 38px;
 }
 
 .compactContent {
-  padding: 8px;
+  padding: 10px;
 }
 
 .close {
@@ -194,8 +207,8 @@
 
   .sidebar {
     position: fixed;
-    left: -252px;
-    width: 232px;
+    left: -260px;
+    width: 244px;
     transition: left .2s ease;
   }
 
@@ -209,13 +222,13 @@
   }
 
   .close {
-    width: 30px;
-    height: 30px;
+    width: 31px;
+    height: 31px;
     place-items: center;
     color: #555d64 !important;
-    background: #f2f3f3 !important;
+    background: #f2f3f4 !important;
     border: 0;
-    border-radius: 8px;
+    border-radius: 9px;
   }
 
   .backdrop {
@@ -223,19 +236,19 @@
     inset: 0;
     z-index: 30;
     display: block;
-    background: rgba(17, 24, 32, .35);
+    background: rgba(17,24,32,.38);
     border: 0;
   }
 
   .header {
-    padding: 10px 12px;
+    padding: 11px 13px;
   }
 
   .content {
-    padding: 12px;
+    padding: 14px;
   }
 
   .compactContent {
-    padding: 4px;
+    padding: 5px;
   }
 }
