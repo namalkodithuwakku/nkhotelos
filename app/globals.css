@@ -1,0 +1,63 @@
+
+/* Dashboards */
+@import "./styles/dashboards/master.css";
+@import "./styles/dashboards/supervisor.css";
+@import "./styles/dashboards/team.css";
+
+/* Base */
+@import "./styles/base/reset.css";
+@import "./styles/base/variables.css";
+@import "./styles/base/light.css";
+@import "./styles/base/dark.css";
+@import "./styles/base/typography.css";
+@import "./styles/base/animations.css";
+
+/* Layout */
+@import "./styles/layout/app.css";
+@import "./styles/layout/sidebar.css";
+@import "./styles/layout/header.css";
+@import "./styles/layout/workspace.css";
+@import "./styles/layout/responsive.css";
+
+/* Components */
+@import "./styles/components/cards.css";
+@import "./styles/components/buttons.css";
+@import "./styles/components/forms.css";
+@import "./styles/components/badges.css";
+@import "./styles/components/metrics.css";
+@import "./styles/components/timeline.css";
+@import "./styles/components/toolbar.css";
+@import "./styles/components/theme-switcher.css";
+@import "./styles/components/ai-panel.css";
+@import "./styles/components/live-clock.css";
+@import "./styles/components/login.css";
+@import "./styles/components/modal.css";
+@import "./styles/mobile.css";
+@import "./styles/mobile-task-polish.css";
+@import "./styles/mobilelogin.css";
+@import "./styles/components/super-mode.css";
+@import "./styles/components/confirm-dialog.css";
+@import "./styles/components/email-task-notice.css";
+@import "./styles/components/email-bulk-actions.css";
+@import "./styles/components/contact-manager.css";
+@import "./styles/components/sms-center.css";
+@import "./styles/staff-workspace.css";
+@import "./styles/whatsapp-workspace.css";
+@import "./styles/components/home-premium.css";
+@import "./styles/components/whatsapp-scroll-fix.css";
+@import "./styles/components/final-ui-polish.css";
+@import "./styles/components/team-break.css";
+@import "./styles/components/niko-pet.css";
+@import "./styles/components/operations-calendar.css";
+@import "./styles/components/reservation-tools.css";
+@import "./styles/components/ota-promotions.css";
+@import "./styles/components/reservation-audit-cancellation.css";
+@import "./styles/components/nkh-tools.css";
+@import "./styles/components/revenue-layout-polish.css";
+@import "./styles/components/revenue-manager.css";
+@import "./styles/components/social-media-creator.css";
+@import "./styles/components/competitor-analysis.css";
+@import "./styles/components/occupancy-analysis.css";
+@import "./styles/components/occupancy-inventory.css";
+@import "./styles/pwa-mobile.css";
+@import "./styles/nkh-premium-ui.css";
