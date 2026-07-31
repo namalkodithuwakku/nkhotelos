@@ -1,6 +1,2 @@
-﻿import PropertyEditor from "./PropertyEditor";
-
-export default function PropertyPage() {
-  return <PropertyEditor />;
-}
-
+import SuperPropertyEditor from "./SuperPropertyEditor";
+export default function PropertyPage(){return <SuperPropertyEditor/>;}
