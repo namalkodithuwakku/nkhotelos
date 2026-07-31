@@ -1,23 +1,68 @@
-N K HOTEL OS — DASHBOARD BUILD FIX
+N K HOTEL OS — MOVE ALL PAGES INTO PERSISTENT LAYOUT
 
-This replaces the malformed:
+CONFIRMED PROBLEM
+
+/dashboard is located at:
 app/(os)/dashboard/page.tsx
 
-Extract into:
+But Calendar is located at:
+app/calendar/page.tsx
+
+Therefore only Dashboard receives:
+app/(os)/layout.tsx
+
+The other routes use their own old OSPageShell, so the global center MENU clip
+cannot control them.
+
+THIS SCRIPT MOVES ALL PROTECTED ROUTES INTO app/(os).
+
+The URLs do not change because folders in parentheses are Next.js route groups.
+
+Examples:
+
+app/calendar/page.tsx
+becomes
+app/(os)/calendar/page.tsx
+
+The browser URL remains:
+/calendar
+
+INSTALL
+
+1. Extract this ZIP into:
+
 E:\NK Labs\NK Hotel OS
 
-Choose Replace files in the destination.
-
-Then run:
+2. Run:
 
 Set-Location "E:\NK Labs\NK Hotel OS"
 
+.\move-all-pages-into-os-layout.ps1
+
 npm run build
 
-Only after the build succeeds:
+3. After the build succeeds:
 
 git add .
-git commit -m "Fix dashboard JSX and sidebar hide show"
+git commit -m "Move all Hotel OS pages into persistent layout"
 git push origin main
 
-The LF/CRLF messages are warnings only and do not cause the build failure.
+EXPECTED RESULT
+
+The same center MENU / CLOSE clip works on:
+
+- Dashboard
+- Calendar
+- Occupancy
+- Revenue Manager
+- Marketing Manager
+- Reputation Manager
+- Tools
+- Actions
+- QR Menu
+- Reports
+- Property
+- Rooms
+- Staff
+- Notifications
+- Settings
