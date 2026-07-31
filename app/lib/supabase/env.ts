@@ -1,40 +1,38 @@
-const requireEnv = (name: string): string => {
-  const value = process.env[name]?.trim();
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabasePublishableKey =
+  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  if (!value) {
-    throw new Error(`Missing required environment variable: ${name}`);
-  }
-
-  return value;
-};
-
-export const getSupabaseUrl = (): string =>
-  requireEnv("NEXT_PUBLIC_SUPABASE_URL");
-
-export const getSupabasePublishableKey = (): string => {
-  const value =
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY?.trim() ||
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim();
-
-  if (!value) {
+export const getSupabaseUrl = (): string => {
+  if (!supabaseUrl) {
     throw new Error(
-      "Missing NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY or NEXT_PUBLIC_SUPABASE_ANON_KEY",
+      "Missing NEXT_PUBLIC_SUPABASE_URL. Add it in .env.local and Vercel Environment Variables, then rebuild.",
     );
   }
 
-  return value;
+  return supabaseUrl;
+};
+
+export const getSupabasePublishableKey = (): string => {
+  if (!supabasePublishableKey) {
+    throw new Error(
+      "Missing NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY or NEXT_PUBLIC_SUPABASE_ANON_KEY. Add it in .env.local and Vercel Environment Variables, then rebuild.",
+    );
+  }
+
+  return supabasePublishableKey;
 };
 
 export const getSupabaseSecretKey = (): string => {
-  const value =
-    process.env.SUPABASE_SERVICE_ROLE_KEY?.trim() ||
-    process.env.SUPABASE_SECRET_KEY?.trim();
+  const secretKey =
+    process.env.SUPABASE_SERVICE_ROLE_KEY ||
+    process.env.SUPABASE_SECRET_KEY;
 
-  if (!value) {
+  if (!secretKey) {
     throw new Error(
-      "Missing SUPABASE_SERVICE_ROLE_KEY or SUPABASE_SECRET_KEY",
+      "Missing SUPABASE_SERVICE_ROLE_KEY or SUPABASE_SECRET_KEY.",
     );
   }
 
-  return value;
+  return secretKey;
 };
