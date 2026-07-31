@@ -14,6 +14,8 @@ import {
   LogOut,
   Megaphone,
   Menu,
+  PanelLeftClose,
+  PanelLeftOpen,
   QrCode,
   Settings,
   Sparkles,
@@ -184,25 +186,13 @@ export default function PersistentOSLayout({
     });
 
   return (
-    <main
-      className={`${styles.shell} ${
-        collapsed ? styles.shellCollapsed : ""
-      }`}
-    >
-      <aside
-        className={`${styles.sidebar} ${
-          mobileOpen ? styles.open : ""
-        } ${collapsed ? styles.collapsed : ""}`}
-      >
+    <main className={`${styles.shell} ${collapsed ? styles.shellCollapsed : ""}`}>
+      <aside className={`${styles.sidebar} ${mobileOpen ? styles.open : ""} ${collapsed ? styles.collapsed : ""}`}>
         <div className={styles.brand}>
-          <span>
-            <Hotel size={22} />
-          </span>
+          <span><Hotel size={22} /></span>
 
           <div className={styles.brandText}>
-            <strong>
-              N K Hotel <b>OS</b>
-            </strong>
+            <strong>N K Hotel <b>OS</b></strong>
             <small>Simplifying Life</small>
           </div>
 
@@ -215,16 +205,6 @@ export default function PersistentOSLayout({
             <X size={19} />
           </button>
         </div>
-
-        <button
-          type="button"
-          className={styles.collapseButton}
-          onClick={toggleSidebar}
-          aria-label={collapsed ? "Show sidebar" : "Hide sidebar"}
-          title={collapsed ? "Show menu" : "Hide menu"}
-        >
-          {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
-        </button>
 
         <nav>{renderLinks(navigation)}</nav>
 
@@ -240,24 +220,14 @@ export default function PersistentOSLayout({
             <small>{role}</small>
           </div>
 
-          <button
-            type="button"
-            onClick={signOut}
-            title="Sign out"
-            aria-label="Sign out"
-          >
+          <button type="button" onClick={signOut} title="Sign out" aria-label="Sign out">
             <LogOut size={17} />
           </button>
         </div>
       </aside>
 
       {mobileOpen ? (
-        <button
-          type="button"
-          className={styles.backdrop}
-          onClick={() => setMobileOpen(false)}
-          aria-label="Close menu"
-        />
+        <button type="button" className={styles.backdrop} onClick={() => setMobileOpen(false)} aria-label="Close menu" />
       ) : null}
 
       <section className={styles.main}>
@@ -271,21 +241,29 @@ export default function PersistentOSLayout({
             <Menu size={20} />
           </button>
 
+          <button
+            type="button"
+            className={styles.desktopToggle}
+            onClick={toggleSidebar}
+            aria-label={collapsed ? "Show sidebar" : "Hide sidebar"}
+            title={collapsed ? "Show sidebar" : "Hide sidebar"}
+          >
+            {collapsed ? <PanelLeftOpen size={19} /> : <PanelLeftClose size={19} />}
+          </button>
+
           <div>
             <small>N K HOTEL OS</small>
             <h1>{titles[pathname] || "Hotel OS"}</h1>
           </div>
         </header>
 
-        <div
-          className={
-            pathname === "/calendar" ||
-            pathname === "/occupancy" ||
-            pathname === "/revenue-manager"
-              ? styles.compact
-              : styles.content
-          }
-        >
+        <div className={
+          pathname === "/calendar" ||
+          pathname === "/occupancy" ||
+          pathname === "/revenue-manager"
+            ? styles.compact
+            : styles.content
+        }>
           {children}
         </div>
       </section>
