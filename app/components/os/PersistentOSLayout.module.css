@@ -6,8 +6,13 @@
   background: #f3f5f7;
 }
 
-.spin { animation: spin .8s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
+.spin {
+  animation: spin .8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
 
 .shell {
   min-height: 100vh;
@@ -18,14 +23,15 @@
   transition: grid-template-columns .22s ease;
 }
 
-.shellCollapsed {
-  grid-template-columns: 78px minmax(0, 1fr);
+.sidebarIsHidden {
+  grid-template-columns: 0 minmax(0, 1fr);
 }
 
 .sidebar {
   position: sticky;
   top: 0;
   z-index: 40;
+  width: 250px;
   height: 100vh;
   display: flex;
   flex-direction: column;
@@ -34,16 +40,27 @@
   background:
     radial-gradient(circle at top left, rgba(239,125,0,.12), transparent 24%),
     linear-gradient(180deg, #242a30, #181d22);
+  box-shadow: 14px 0 35px rgba(20,25,30,.07);
   overflow-y: auto;
   overflow-x: hidden;
+  transform: translateX(0);
+  opacity: 1;
+  transition:
+    transform .22s ease,
+    opacity .18s ease;
+}
+
+.hiddenSidebar {
+  transform: translateX(-100%);
+  opacity: 0;
+  pointer-events: none;
 }
 
 .brand {
   display: flex;
   align-items: center;
   gap: 11px;
-  min-height: 43px;
-  padding: 3px 5px 22px;
+  padding: 3px 5px 14px;
 }
 
 .brand > span {
@@ -57,30 +74,49 @@
   border-radius: 13px;
 }
 
-.brandText,
-.userText {
-  min-width: 0;
-  white-space: nowrap;
-  opacity: 1;
-  transition: opacity .14s ease;
-}
-
 .brand strong {
   display: block;
   color: #fff;
   font-size: 16px;
+  white-space: nowrap;
 }
 
-.brand b { color: #ff9a2c; }
+.brand b {
+  color: #ff9a2c;
+}
 
 .brand small {
   display: block;
   margin-top: 4px;
   color: rgba(255,255,255,.46);
   font-size: 10px;
+  white-space: nowrap;
 }
 
-.mobileClose { display: none; margin-left: auto; }
+.mobileClose {
+  display: none;
+  margin-left: auto;
+}
+
+.hideMenuButton {
+  min-height: 37px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  margin: 0 4px 13px;
+  color: rgba(255,255,255,.62) !important;
+  background: rgba(255,255,255,.055) !important;
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 9px;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.hideMenuButton:hover {
+  color: #fff !important;
+  background: rgba(255,255,255,.09) !important;
+}
 
 .sidebar nav {
   display: grid;
@@ -108,13 +144,13 @@
 
 .sidebar nav .active {
   color: #fff !important;
-  background: linear-gradient(135deg, rgba(239,125,0,.30), rgba(239,125,0,.13)) !important;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(239,125,0,.30),
+      rgba(239,125,0,.13)
+    ) !important;
   box-shadow: inset 3px 0 0 #ff9a2c;
-}
-
-.sidebar nav a > span {
-  opacity: 1;
-  transition: opacity .14s ease;
 }
 
 .sectionLabel {
@@ -123,7 +159,6 @@
   font-size: 9px;
   font-weight: 900;
   letter-spacing: .15em;
-  white-space: nowrap;
 }
 
 .user {
@@ -148,7 +183,12 @@
   font-weight: 850;
 }
 
-.user strong { display: block; color: #fff; font-size: 11px; }
+.user strong {
+  display: block;
+  color: #fff;
+  font-size: 11px;
+}
+
 .user small {
   display: block;
   margin-top: 2px;
@@ -168,46 +208,45 @@
   border-radius: 9px;
 }
 
-/* Correct selectors: collapsed class is on the sidebar itself */
-.collapsed {
-  padding-left: 11px;
-  padding-right: 11px;
+.showMenuButton {
+  position: fixed;
+  left: 0;
+  top: 92px;
+  z-index: 60;
+  min-height: 43px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 11px 0 9px;
+  color: #fff !important;
+  background: linear-gradient(135deg, #2a3036, #1b2025) !important;
+  border: 1px solid rgba(255,255,255,.08);
+  border-left: 0;
+  border-radius: 0 11px 11px 0;
+  box-shadow: 0 9px 22px rgba(18,24,29,.18);
+  font-size: 10px;
+  font-weight: 850;
+  animation: show-tab .18s ease;
 }
 
-.collapsed .brand {
-  justify-content: center;
-  padding-left: 0;
-  padding-right: 0;
+.showMenuButton:hover {
+  background: linear-gradient(135deg, #ef7d00, #d96f00) !important;
 }
 
-.collapsed .brandText,
-.collapsed nav a > span,
-.collapsed .sectionLabel,
-.collapsed .userText {
-  width: 0;
-  overflow: hidden;
-  opacity: 0;
-  pointer-events: none;
+@keyframes show-tab {
+  from {
+    transform: translateX(-14px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }
 
-.collapsed nav a {
-  justify-content: center;
-  gap: 0;
-  padding: 0;
+.main {
+  min-width: 0;
 }
-
-.collapsed .user {
-  grid-template-columns: 1fr;
-  justify-items: center;
-  gap: 8px;
-}
-
-.collapsed .user > button {
-  width: 38px;
-  height: 38px;
-}
-
-.main { min-width: 0; }
 
 .main > header {
   position: sticky;
@@ -216,7 +255,7 @@
   min-height: 78px;
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 11px;
   padding: 13px 25px;
   background: rgba(255,255,255,.94);
   border-bottom: 1px solid #e5e9ec;
@@ -237,8 +276,8 @@
   letter-spacing: -.025em;
 }
 
-.menu,
-.desktopToggle {
+.mobileMenu {
+  display: none;
   width: 38px;
   height: 38px;
   place-items: center;
@@ -248,69 +287,52 @@
   border-radius: 10px;
 }
 
-.menu { display: none; }
-.desktopToggle { display: grid; }
-
-.desktopToggle:hover {
-  color: #ef7d00 !important;
-  background: #fff4e8 !important;
-  border-color: #f2d1ab;
+.content {
+  padding: 22px 25px 38px;
 }
 
-.content { padding: 22px 25px 38px; }
-.compact { padding: 8px; }
-.backdrop { display: none; }
+.compact {
+  padding: 8px;
+}
+
+.backdrop {
+  display: none;
+}
 
 @media (max-width: 860px) {
   .shell,
-  .shellCollapsed {
+  .sidebarIsHidden {
     display: block;
   }
 
   .sidebar,
-  .collapsed {
+  .hiddenSidebar {
     position: fixed;
     left: -270px;
     width: 250px;
     padding: 18px 14px;
+    transform: none;
+    opacity: 1;
+    pointer-events: auto;
     transition: left .2s ease;
   }
 
-  .sidebar.open { left: 0; }
-
-  .collapsed .brand {
-    justify-content: flex-start;
-    padding: 3px 5px 22px;
+  .sidebar.mobileOpen {
+    left: 0;
   }
 
-  .collapsed .brandText,
-  .collapsed nav a > span,
-  .collapsed .sectionLabel,
-  .collapsed .userText {
-    width: auto;
-    overflow: visible;
-    opacity: 1;
-    pointer-events: auto;
+  .hideMenuButton {
+    display: none;
   }
 
-  .collapsed nav a {
-    justify-content: flex-start;
-    gap: 11px;
-    padding: 0 11px;
-  }
-
-  .collapsed .user {
-    grid-template-columns: 38px 1fr 34px;
-    justify-items: stretch;
-    gap: 9px;
+  .showMenuButton {
+    display: none;
   }
 
   .mobileClose,
-  .menu {
+  .mobileMenu {
     display: grid;
   }
-
-  .desktopToggle { display: none; }
 
   .mobileClose {
     width: 31px;
@@ -331,7 +353,15 @@
     border: 0;
   }
 
-  .main > header { padding: 11px 13px; }
-  .content { padding: 14px; }
-  .compact { padding: 4px; }
+  .main > header {
+    padding: 11px 13px;
+  }
+
+  .content {
+    padding: 14px;
+  }
+
+  .compact {
+    padding: 4px;
+  }
 }

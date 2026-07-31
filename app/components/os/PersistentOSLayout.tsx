@@ -6,8 +6,6 @@ import {
   Building2,
   CalendarDays,
   ChartNoAxesCombined,
-  ChevronLeft,
-  ChevronRight,
   Hotel,
   LayoutDashboard,
   Loader2,
@@ -32,7 +30,7 @@ import { ReactNode, useEffect, useMemo, useState } from "react";
 import { createClient } from "../../lib/supabase/client";
 import styles from "./PersistentOSLayout.module.css";
 
-const SIDEBAR_STORAGE_KEY = "nkh-os-sidebar-collapsed";
+const SIDEBAR_STORAGE_KEY = "nkh-os-sidebar-hidden";
 
 const navigation = [
   ["Dashboard", "/dashboard", LayoutDashboard],
@@ -83,15 +81,16 @@ export default function PersistentOSLayout({
   const supabase = useMemo(() => createClient(), []);
 
   const [ready, setReady] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [collapsed, setCollapsed] = useState(false);
   const [sidebarReady, setSidebarReady] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [sidebarHidden, setSidebarHidden] = useState(false);
   const [name, setName] = useState("Hotelier");
   const [role, setRole] = useState("Master");
 
   useEffect(() => {
-    const saved = window.localStorage.getItem(SIDEBAR_STORAGE_KEY);
-    setCollapsed(saved === "true");
+    setSidebarHidden(
+      window.localStorage.getItem(SIDEBAR_STORAGE_KEY) === "true",
+    );
     setSidebarReady(true);
   }, []);
 
@@ -143,12 +142,14 @@ export default function PersistentOSLayout({
     };
   }, [router, supabase]);
 
-  function toggleSidebar() {
-    setCollapsed((current) => {
-      const next = !current;
-      window.localStorage.setItem(SIDEBAR_STORAGE_KEY, String(next));
-      return next;
-    });
+  function hideSidebar() {
+    setSidebarHidden(true);
+    window.localStorage.setItem(SIDEBAR_STORAGE_KEY, "true");
+  }
+
+  function showSidebar() {
+    setSidebarHidden(false);
+    window.localStorage.setItem(SIDEBAR_STORAGE_KEY, "false");
   }
 
   async function signOut() {
@@ -176,8 +177,6 @@ export default function PersistentOSLayout({
           href={href}
           className={active ? styles.active : ""}
           onClick={() => setMobileOpen(false)}
-          title={collapsed ? label : undefined}
-          aria-label={label}
         >
           <Icon size={18} />
           <span>{label}</span>
@@ -186,13 +185,25 @@ export default function PersistentOSLayout({
     });
 
   return (
-    <main className={`${styles.shell} ${collapsed ? styles.shellCollapsed : ""}`}>
-      <aside className={`${styles.sidebar} ${mobileOpen ? styles.open : ""} ${collapsed ? styles.collapsed : ""}`}>
+    <main
+      className={`${styles.shell} ${
+        sidebarHidden ? styles.sidebarIsHidden : ""
+      }`}
+    >
+      <aside
+        className={`${styles.sidebar} ${
+          mobileOpen ? styles.mobileOpen : ""
+        } ${sidebarHidden ? styles.hiddenSidebar : ""}`}
+      >
         <div className={styles.brand}>
-          <span><Hotel size={22} /></span>
+          <span>
+            <Hotel size={22} />
+          </span>
 
-          <div className={styles.brandText}>
-            <strong>N K Hotel <b>OS</b></strong>
+          <div>
+            <strong>
+              N K Hotel <b>OS</b>
+            </strong>
             <small>Simplifying Life</small>
           </div>
 
@@ -206,6 +217,15 @@ export default function PersistentOSLayout({
           </button>
         </div>
 
+        <button
+          type="button"
+          className={styles.hideMenuButton}
+          onClick={hideSidebar}
+        >
+          <PanelLeftClose size={17} />
+          <span>Hide menu</span>
+        </button>
+
         <nav>{renderLinks(navigation)}</nav>
 
         <p className={styles.sectionLabel}>MANAGE</p>
@@ -214,41 +234,52 @@ export default function PersistentOSLayout({
 
         <div className={styles.user}>
           <i>{name.charAt(0).toUpperCase()}</i>
-
-          <div className={styles.userText}>
+          <div>
             <strong>{name}</strong>
             <small>{role}</small>
           </div>
-
-          <button type="button" onClick={signOut} title="Sign out" aria-label="Sign out">
+          <button
+            type="button"
+            onClick={signOut}
+            title="Sign out"
+            aria-label="Sign out"
+          >
             <LogOut size={17} />
           </button>
         </div>
       </aside>
 
       {mobileOpen ? (
-        <button type="button" className={styles.backdrop} onClick={() => setMobileOpen(false)} aria-label="Close menu" />
+        <button
+          type="button"
+          className={styles.backdrop}
+          onClick={() => setMobileOpen(false)}
+          aria-label="Close menu"
+        />
+      ) : null}
+
+      {sidebarHidden ? (
+        <button
+          type="button"
+          className={styles.showMenuButton}
+          onClick={showSidebar}
+          title="Show menu"
+          aria-label="Show menu"
+        >
+          <PanelLeftOpen size={19} />
+          <span>Show menu</span>
+        </button>
       ) : null}
 
       <section className={styles.main}>
         <header>
           <button
             type="button"
-            className={styles.menu}
+            className={styles.mobileMenu}
             onClick={() => setMobileOpen(true)}
             aria-label="Open menu"
           >
             <Menu size={20} />
-          </button>
-
-          <button
-            type="button"
-            className={styles.desktopToggle}
-            onClick={toggleSidebar}
-            aria-label={collapsed ? "Show sidebar" : "Hide sidebar"}
-            title={collapsed ? "Show sidebar" : "Hide sidebar"}
-          >
-            {collapsed ? <PanelLeftOpen size={19} /> : <PanelLeftClose size={19} />}
           </button>
 
           <div>
@@ -257,13 +288,15 @@ export default function PersistentOSLayout({
           </div>
         </header>
 
-        <div className={
-          pathname === "/calendar" ||
-          pathname === "/occupancy" ||
-          pathname === "/revenue-manager"
-            ? styles.compact
-            : styles.content
-        }>
+        <div
+          className={
+            pathname === "/calendar" ||
+            pathname === "/occupancy" ||
+            pathname === "/revenue-manager"
+              ? styles.compact
+              : styles.content
+          }
+        >
           {children}
         </div>
       </section>
