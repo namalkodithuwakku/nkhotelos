@@ -1,0 +1,140 @@
+.loading {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  color: #ef7d00;
+  background: #f4f5f6;
+}
+
+.spinner {
+  animation: os-route-spin .8s linear infinite;
+}
+
+@keyframes os-route-spin {
+  to { transform: rotate(360deg); }
+}
+
+.page {
+  min-height: 100vh;
+  color: #20252b;
+  background: #f4f5f6;
+}
+
+.header {
+  min-height: 68px;
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr) 150px;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 20px;
+  background: #fff;
+  border-bottom: 1px solid #e4e7e9;
+}
+
+.back,
+.signOut {
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 11px;
+  color: #4f5861 !important;
+  background: #f4f5f5 !important;
+  border: 0;
+  border-radius: 9px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.back {
+  width: max-content;
+}
+
+.signOut {
+  justify-self: end;
+}
+
+.title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.logo {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  color: #fff;
+  background: #ef7d00;
+  border-radius: 10px;
+}
+
+.title small {
+  display: block;
+  color: #ef7d00;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+}
+
+.title h1 {
+  margin: 3px 0 0;
+  color: #20252b;
+  font-size: 18px;
+  line-height: 1.2;
+}
+
+.content {
+  width: min(1480px, calc(100% - 32px));
+  margin: 16px auto 30px;
+}
+
+.fullContent {
+  width: 100%;
+  padding: 12px;
+}
+
+@media (max-width: 700px) {
+  .header {
+    grid-template-columns: 42px minmax(0, 1fr) 42px;
+    padding: 9px 10px;
+  }
+
+  .back,
+  .signOut {
+    width: 38px;
+    padding: 0;
+    justify-content: center;
+  }
+
+  .back {
+    font-size: 0;
+  }
+
+  .signOut span {
+    display: none;
+  }
+
+  .logo {
+    width: 34px;
+    height: 34px;
+  }
+
+  .title h1 {
+    font-size: 15px;
+  }
+
+  .content {
+    width: calc(100% - 16px);
+    margin-top: 8px;
+  }
+
+  .fullContent {
+    padding: 6px;
+  }
+}
