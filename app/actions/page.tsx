@@ -1,21 +1,10 @@
-import { Zap } from "lucide-react";
-import ModuleComingSoon from "../components/os/ModuleComingSoon";
 import OSPageShell from "../components/os/OSPageShell";
+import ActionsManager from "./ActionsManager";
 
-export default function Page() {
+export default function ActionsPage() {
   return (
     <OSPageShell title="Actions">
-      <ModuleComingSoon
-        icon={Zap}
-        title="Actions"
-        description="See what needs to be done, who should do it and what matters most."
-        items={[
-        "Priority action list",
-        "Revenue actions",
-        "Marketing actions",
-        "Reputation actions"
-        ]}
-      />
+      <ActionsManager />
     </OSPageShell>
   );
 }

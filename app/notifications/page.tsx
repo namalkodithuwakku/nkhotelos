@@ -1,21 +1,10 @@
-import { Bell } from "lucide-react";
-import ModuleComingSoon from "../components/os/ModuleComingSoon";
 import OSPageShell from "../components/os/OSPageShell";
+import NotificationsManager from "./NotificationsManager";
 
-export default function Page() {
+export default function NotificationsPage() {
   return (
     <OSPageShell title="Notifications">
-      <ModuleComingSoon
-        icon={Bell}
-        title="Notifications"
-        description="Keep important hotel and system alerts in one place."
-        items={[
-        "Booking alerts",
-        "Occupancy alerts",
-        "Revenue alerts",
-        "System notifications"
-        ]}
-      />
+      <NotificationsManager />
     </OSPageShell>
   );
 }

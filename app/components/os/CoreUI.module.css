@@ -1,0 +1,278 @@
+.page {
+  color: #20252b;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.toolbar h2 {
+  margin: 0;
+  color: #20252b;
+  font-size: 18px;
+}
+
+.toolbar p {
+  margin: 4px 0 0;
+  color: #737b82;
+  font-size: 11px;
+}
+
+.primary,
+.secondary,
+.danger,
+.smallButton {
+  min-height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 13px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.primary {
+  color: #fff !important;
+  background: #ef7d00 !important;
+  border: 0;
+}
+
+.secondary {
+  color: #30373d !important;
+  background: #fff !important;
+  border: 1px solid #dfe3e6;
+}
+
+.danger {
+  color: #a31b1b !important;
+  background: #fff1f1 !important;
+  border: 1px solid #ffd4d4;
+}
+
+.smallButton {
+  min-height: 31px;
+  padding: 0 9px;
+  color: #4f575e !important;
+  background: #f4f5f5 !important;
+  border: 0;
+}
+
+.grid {
+  display: grid;
+  gap: 12px;
+}
+
+.twoColumn {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.card {
+  padding: 16px;
+  background: #fff;
+  border: 1px solid #e4e7e9;
+  border-radius: 12px;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 13px;
+}
+
+.cardHeader h3 {
+  margin: 0;
+  color: #20252b;
+  font-size: 14px;
+}
+
+.cardHeader p {
+  margin: 4px 0 0;
+  color: #7b8288;
+  font-size: 10px;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 11px;
+}
+
+.field {
+  display: block;
+}
+
+.fieldWide {
+  grid-column: 1 / -1;
+}
+
+.field span {
+  display: block;
+  margin-bottom: 6px;
+  color: #4d555c;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.field input,
+.field select,
+.field textarea {
+  width: 100%;
+  min-height: 40px;
+  padding: 9px 11px;
+  color: #20252b !important;
+  background: #fff !important;
+  border: 1px solid #dfe3e5;
+  border-radius: 8px;
+  outline: none;
+  font-size: 11px;
+}
+
+.field textarea {
+  min-height: 82px;
+  resize: vertical;
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  border-color: #ef7d00;
+  box-shadow: 0 0 0 3px rgba(239,125,0,.1);
+}
+
+.list {
+  display: grid;
+  gap: 8px;
+}
+
+.listRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) repeat(3, minmax(90px, .55fr)) auto;
+  align-items: center;
+  gap: 10px;
+  min-height: 58px;
+  padding: 10px 12px;
+  background: #fff;
+  border: 1px solid #e4e7e9;
+  border-radius: 10px;
+}
+
+.listRow strong {
+  display: block;
+  color: #20252b;
+  font-size: 12px;
+}
+
+.listRow small {
+  display: block;
+  margin-top: 3px;
+  color: #838a90;
+  font-size: 9px;
+}
+
+.badge {
+  width: max-content;
+  padding: 4px 7px;
+  color: #4e565d;
+  background: #f2f3f3;
+  border-radius: 12px;
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: capitalize;
+}
+
+.successBadge {
+  color: #176f45;
+  background: #edf8f2;
+}
+
+.warningBadge {
+  color: #8a5a14;
+  background: #fff6e8;
+}
+
+.error {
+  padding: 11px 12px;
+  color: #a21d1d;
+  background: #fff1f1;
+  border: 1px solid #ffd3d3;
+  border-radius: 9px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.success {
+  padding: 11px 12px;
+  color: #176f45;
+  background: #edf9f3;
+  border: 1px solid #d0eddd;
+  border-radius: 9px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.empty,
+.loading {
+  min-height: 170px;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  color: #7a8289;
+  background: #fff;
+  border: 1px dashed #d9dde0;
+  border-radius: 11px;
+  text-align: center;
+  font-size: 11px;
+}
+
+.tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
+  overflow-x: auto;
+}
+
+.tabs button {
+  min-height: 34px;
+  padding: 0 11px;
+  color: #5c646b !important;
+  background: #fff !important;
+  border: 1px solid #e1e4e6;
+  border-radius: 8px;
+  white-space: nowrap;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.tabs .activeTab {
+  color: #ef7d00 !important;
+  background: #fff3e5 !important;
+  border-color: #f5d2a8;
+}
+
+@media (max-width: 760px) {
+  .toolbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .twoColumn,
+  .formGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .fieldWide {
+    grid-column: auto;
+  }
+
+  .listRow {
+    grid-template-columns: 1fr;
+  }
+}
