@@ -214,7 +214,7 @@ export default function CalendarWorkspace() {
   const selectedRooms = useMemo(() => selected ? data.bookings
     .filter(booking => (booking.booking_group_key || booking.id) === (selected.booking_group_key || selected.id))
     .map(booking => booking.room_name).filter((room, index, rooms) => rooms.indexOf(room) === index) : [], [data.bookings, selected]);
-  const nativeMode = data.property?.calendar_source_mode === "supabase";
+  const nativeMode = true;
   useEffect(() => {
     if (zoomTouched) return;
     setRowHeight(roomNames.length <= 15 ? 64 : roomNames.length <= 25 ? 56 : 48);
@@ -336,7 +336,7 @@ export default function CalendarWorkspace() {
 
   return <section ref={calendarRef} className={`operations-calendar ${fullscreen ? "calendar-fullscreen" : ""}`}>
     <header className="calendar-toolbar">
-      <div><small>LIVE PROPERTY COVERAGE</small><h2>Reservation calendar</h2><p>{nativeMode ? "Live booking calendar managed directly in NKH Dashboard." : "Read-only booking view copied from the property Google Sheet."}</p></div>
+      <div><small>LIVE PROPERTY COVERAGE</small><h2>Reservation calendar</h2><p>"Live booking calendar managed directly by N K Hotel OS."</p></div>
       <div className="calendar-controls">
         <select value={propertyId} onChange={event => chooseProperty(event.target.value)} aria-label="Property">{data.properties.map(property => <option key={property.id} value={property.id}>{property.property_name}</option>)}</select>
         {nativeMode && <button className="calendar-add-booking" onClick={() => { setDraft(null); setEditing("new"); }}><Plus size={16}/> Add booking</button>}
@@ -366,15 +366,14 @@ export default function CalendarWorkspace() {
     </div>
 
     <div className="calendar-status-row">
-      <span className={data.sync?.last_status === "Ready" || nativeMode ? "ready" : ""}><i />{nativeMode ? "Dashboard calendar active" : backgroundSyncing ? "Checking source in background" : data.sync?.last_status || "Waiting for first sync"}</span>
-      <span>{nativeMode ? "Live Supabase data" : data.sync?.last_completed_at ? `Updated ${new Date(data.sync.last_completed_at).toLocaleString()}` : "No calendar copy received yet"}</span>
+      <span className="ready"><i />Hotel OS calendar active</span>
+      <span>Live property room inventory</span>
       <span>{roomNames.length} rooms Â· {bookingCount} bookings in view</span>
     </div>
 
     {error === "Please sign in again." ? <CalendarSessionRepair onReady={() => void load(propertyId, month)} />
       : error ? <div className="calendar-message error">{error}<button onClick={() => void load()}>Try again</button></div>
-      : !nativeMode && !data.property?.calendar_sheet_code ? <div className="calendar-message"><CalendarDays/><h3>Calendar source not connected</h3><p>Add this propertyâ€™s Google Sheet URL under Properties â†’ Edit overview.</p></div>
-      : !loading && !roomNames.length ? <div className="calendar-message"><CalendarDays/><h3>No room inventory yet</h3><p>Add room types, room counts and room names under Properties â†’ Room Types.</p>{data.sync?.last_error && <em>{data.sync.last_error}</em>}</div>
+      : !loading && !roomNames.length ? <div className="calendar-message"><CalendarDays/><h3>No rooms available</h3><p>Save active rooms under Property - Individual Rooms. They will appear here automatically.</p></div>
       : <div ref={boardRef} className={`calendar-board ${loading ? "loading" : ""}`}>
         <div className="calendar-grid" style={{ "--calendar-days": timelineDays, "--calendar-row-height": `${rowHeight}px` } as React.CSSProperties}>
           <div className="calendar-corner">Room</div>
@@ -439,6 +438,7 @@ export default function CalendarWorkspace() {
     {deleteTarget && <div className="calendar-detail-backdrop"><form className="calendar-cancel-form" onSubmit={event => { event.preventDefault(); void deleteBooking(); }}><button type="button" className="modal-close" aria-label="Close deletion window" onClick={() => setDeleteTarget(null)}><X size={18}/></button><small>MASTER ACCESS Â· PERMANENT ACTION</small><h3>Delete {deleteTarget.guest_name} permanently?</h3><p>This removes every room allocation in this reservation group and cannot be undone. Use Cancel reservation instead when history must be preserved.</p><footer><button type="button" onClick={() => setDeleteTarget(null)}>Keep booking</button><button className="danger" disabled={saving}>{saving ? "Deletingâ€¦" : "Delete permanently"}</button></footer></form></div>}
   </section>;
 }
+
 
 
 
