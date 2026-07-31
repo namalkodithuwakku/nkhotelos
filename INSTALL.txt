@@ -1,0 +1,23 @@
+N K HOTEL OS — DASHBOARD BUILD FIX
+
+This replaces the malformed:
+app/(os)/dashboard/page.tsx
+
+Extract into:
+E:\NK Labs\NK Hotel OS
+
+Choose Replace files in the destination.
+
+Then run:
+
+Set-Location "E:\NK Labs\NK Hotel OS"
+
+npm run build
+
+Only after the build succeeds:
+
+git add .
+git commit -m "Fix dashboard JSX and sidebar hide show"
+git push origin main
+
+The LF/CRLF messages are warnings only and do not cause the build failure.
