@@ -55,6 +55,8 @@ export default function CalendarWorkspace() {
   const [propertyReady, setPropertyReady] = useState(false);
   const [error, setError] = useState("");
   const calendarRef = useRef<HTMLElement>(null);
+  const boardRef = useRef<HTMLDivElement>(null);
+  const todayHeaderRef = useRef<HTMLDivElement>(null);
   const monthPickerRef = useRef<HTMLDivElement>(null);
   const selectedPropertyRef = useRef("");
   const activeLoadRef = useRef<AbortController | null>(null);
@@ -64,6 +66,7 @@ export default function CalendarWorkspace() {
   const inventorySyncRef = useRef(new Set<string>());
   const longPressRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const today = useMemo(() => new Date(), []);
+  const todayKey = useMemo(() => dateKey(today), [today]);
   const currentMonth = month === monthValue(today);
   const timelineDays = 42;
   const viewStart = useMemo(() => {
@@ -167,6 +170,28 @@ export default function CalendarWorkspace() {
     return () => activeLoadRef.current?.abort();
   }, []);
   useEffect(() => { if (propertyReady) void load(propertyId, month); }, [month, propertyId, propertyReady, load]);
+
+  const centerTodayColumn = useCallback(() => {
+    const board = boardRef.current;
+    const header = todayHeaderRef.current;
+    if (!board || !header) return;
+
+    const target =
+      header.offsetLeft -
+      board.clientWidth / 2 +
+      header.clientWidth / 2;
+
+    board.scrollTo({
+      left: Math.max(0, target),
+      behavior: "smooth",
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!currentMonth || loading) return;
+    const timer = window.setTimeout(centerTodayColumn, 120);
+    return () => window.clearTimeout(timer);
+  }, [centerTodayColumn, currentMonth, loading]);
   useEffect(() => {
     const handler = () => setFullscreen(document.fullscreenElement === calendarRef.current);
     document.addEventListener("fullscreenchange", handler);
@@ -220,7 +245,7 @@ export default function CalendarWorkspace() {
     }));
   }
   function shiftWeek(amount: number) { activeViewRef.current = ""; setWeekOffset(value => value + amount); }
-  function goToday() { activeViewRef.current = ""; setMonth(monthValue(today)); setWeekOffset(0); setSelectedCells([]); }
+  function goToday() { activeViewRef.current = ""; setMonth(monthValue(today)); setWeekOffset(0); setSelectedCells([]); window.setTimeout(centerTodayColumn, 160); }
   function datesForRange(start: string, end: string) {
     const result: string[] = [];
     for (let date = localDate(start); date <= localDate(end); date = addDays(date, 1)) result.push(dateKey(date));
@@ -230,6 +255,7 @@ export default function CalendarWorkspace() {
     return data.bookings.some(booking => booking.room_name === room && date >= booking.check_in && date < booking.check_out);
   }
   function selectCalendarCell(room: string, date: string) {
+    if (date < todayKey) { setError("Past dates are locked. New bookings can start from today."); return; }
     if (!nativeMode || cellOccupied(room, date)) return;
     const sameRoom = selectedCells.filter(cell => cell.room === room);
     if (!sameRoom.length || selectedCells.some(cell => cell.room !== room)) {
@@ -349,13 +375,13 @@ export default function CalendarWorkspace() {
       : error ? <div className="calendar-message error">{error}<button onClick={() => void load()}>Try again</button></div>
       : !nativeMode && !data.property?.calendar_sheet_code ? <div className="calendar-message"><CalendarDays/><h3>Calendar source not connected</h3><p>Add this propertyâ€™s Google Sheet URL under Properties â†’ Edit overview.</p></div>
       : !loading && !roomNames.length ? <div className="calendar-message"><CalendarDays/><h3>No room inventory yet</h3><p>Add room types, room counts and room names under Properties â†’ Room Types.</p>{data.sync?.last_error && <em>{data.sync.last_error}</em>}</div>
-      : <div className={`calendar-board ${loading ? "loading" : ""}`}>
+      : <div ref={boardRef} className={`calendar-board ${loading ? "loading" : ""}`}>
         <div className="calendar-grid" style={{ "--calendar-days": timelineDays, "--calendar-row-height": `${rowHeight}px` } as React.CSSProperties}>
           <div className="calendar-corner">Room</div>
           {viewDates.map(date => {
             const current = dateKey(date) === dateKey(today), weekend = date.getDay() === 0 || date.getDay() === 6;
             const first = date.getDate() === 1 || dateKey(date) === dateKey(viewStart);
-            return <div key={dateKey(date)} className={`calendar-day ${current ? "today" : ""} ${weekend ? "weekend" : ""}`} title={date.toLocaleDateString()}>{first && <em>{date.toLocaleDateString("en-US", { month: "short" })}</em>}<strong>{date.getDate()}</strong><small>{date.toLocaleDateString("en-US", { weekday: "short" })}</small></div>;
+            return <div ref={current ? todayHeaderRef : undefined} key={dateKey(date)} className={`calendar-day ${current ? "today" : ""} ${weekend ? "weekend" : ""}`} title={date.toLocaleDateString()}>{first && <em>{date.toLocaleDateString("en-US", { month: "short" })}</em>}<strong>{date.getDate()}</strong><small>{date.toLocaleDateString("en-US", { weekday: "short" })}</small></div>;
           })}
           {roomNames.map((roomName, roomIndex) => {
             const room = data.rooms.find(item => item.room_name === roomName);
@@ -365,7 +391,7 @@ export default function CalendarWorkspace() {
               <div className="calendar-room-days">
                 {viewDates.map(date => {
                   const key = dateKey(date), selectedCell = selectedCells.some(cell => cell.room === roomName && cell.date === key);
-                  return <button key={key} type="button" aria-label={`${roomName} ${key}`} onClick={() => selectCalendarCell(roomName, key)} onDoubleClick={() => { if (nativeMode && !cellOccupied(roomName, key)) { setDraft({ roomNames: [roomName], checkIn: key, checkOut: dateKey(addDays(localDate(key), 1)), action: "add" }); setEditing("new"); setSelectedCells([]); } }} className={`${key === dateKey(today) ? "today" : ""} ${selectedCell ? "selected" : ""} ${nativeMode && !cellOccupied(roomName, key) ? "selectable" : ""}`}/>;
+                  const past = key < todayKey; return <button key={key} type="button" disabled={past} title={past ? "Past date locked" : `${roomName} ${key}`} aria-label={`${roomName} ${key}`} onClick={() => selectCalendarCell(roomName, key)} onDoubleClick={() => { if (!past && nativeMode && !cellOccupied(roomName, key)) { setDraft({ roomNames: [roomName], checkIn: key, checkOut: dateKey(addDays(localDate(key), 1)), action: "add" }); setEditing("new"); setSelectedCells([]); } }} className={`${key === todayKey ? "today" : ""} ${past ? "past-locked" : ""} ${selectedCell ? "selected" : ""} ${!past && nativeMode && !cellOccupied(roomName, key) ? "selectable" : ""}`}/>;
                 })}
                 {rowBookings.map(booking => {
                   const bookingStart = localDate(booking.check_in), bookingEnd = localDate(booking.check_out);
@@ -408,10 +434,12 @@ export default function CalendarWorkspace() {
       {selected.updated_at && <div><dt>Updated</dt><dd>{new Date(selected.updated_at).toLocaleString()}</dd></div>}
     </dl>{selected.notes && <section className="reservation-notes"><small>NOTES</small><p>{selected.notes}</p></section>}{nativeMode ? <><div className="reservation-quick-actions">{selected.phone && <a href={`tel:${selected.phone}`}>Call guest</a>}{selected.phone && <a href={`https://wa.me/${selected.phone.replace(/\D/g,"")}`} target="_blank" rel="noreferrer">WhatsApp</a>}{selected.booking_reference && <button onClick={() => void navigator.clipboard?.writeText(selected.booking_reference || "")}>Copy reference</button>}<button onClick={() => { setMovingBooking(selected); setSelected(null); }}>Move room</button></div><footer className="calendar-booking-actions"><button onClick={() => { setDraft(null); setEditing(selected); }}>Edit booking</button><button className="cancel-action" onClick={() => setCancelTarget(selected)}>Cancel booking</button>{data.permissions?.canDelete && <button className="danger" disabled={saving} onClick={() => setDeleteTarget(selected)}>Delete permanently</button>}</footer></> : <em>{selectedRooms.length > 1 ? `${selectedRooms.length} room allocations Â· ` : ""}Read-only Sheet view</em>}</article></div>}
 
-    {editing && data.property && <div className="calendar-detail-backdrop" onClick={() => { setEditing(null); setDraft(null); }}><form className="calendar-booking-form" onClick={event => event.stopPropagation()} onSubmit={saveBooking}><button type="button" className="modal-close" aria-label="Close booking window" onClick={() => { setEditing(null); setDraft(null); }}><X size={18}/></button><small>SUPABASE CALENDAR</small><h3>{draft?.action === "block" ? "Block room dates" : editing === "new" ? "Add booking" : "Edit booking"}</h3><div className="booking-form-grid"><label>Guest name<input name="guest_name" defaultValue={draft?.action === "block" ? "Blocked" : editing === "new" ? "" : editing.guest_name} required/></label><fieldset className="wide booking-room-selector"><legend>Room allocation</legend>{roomNames.map(room => { const checked = editing === "new" ? Boolean(draft?.roomNames.includes(room)) : selectedRooms.includes(room); return <label key={room}><input name="room_names" type="checkbox" value={room} defaultChecked={checked}/><span>{room}</span></label>; })}</fieldset><label>Check-in<input name="check_in" type="date" defaultValue={editing === "new" ? draft?.checkIn || "" : editing.check_in} required/></label><label>Check-out<input name="check_out" type="date" defaultValue={editing === "new" ? draft?.checkOut || "" : editing.check_out} required/></label><label>Source<select name="booking_source" defaultValue={draft?.action === "block" ? "Blocked" : editing === "new" ? "FIT" : editing.booking_source === "Direct" ? "FIT" : editing.booking_source}>{["FIT","Booking.com","Agoda","Expedia","Airbnb","Travel Agent","Blocked"].map(value => <option key={value}>{value}</option>)}</select></label><label>Status<select name="booking_status" defaultValue={draft?.action === "block" ? "Blocked" : editing === "new" ? "Confirmed" : editing.booking_status}>{["Confirmed","Pending","Checked In","Checked Out","Blocked"].map(value => <option key={value}>{value}</option>)}</select></label><label>Reference<input name="booking_reference" defaultValue={editing === "new" ? "" : editing.booking_reference || ""}/></label><label>Phone<input name="phone" defaultValue={editing === "new" ? "" : editing.phone || ""}/></label><label>Email<input name="email" type="email" defaultValue={editing === "new" ? "" : editing.email || ""}/></label><label>Adults<input name="adults" type="number" min="0" defaultValue={editing === "new" ? 1 : editing.adults || 1}/></label><label>Children<input name="children" type="number" min="0" defaultValue={editing === "new" ? 0 : editing.children || 0}/></label><label>Children ages<input name="children_ages" defaultValue={editing === "new" ? "" : editing.children_ages?.join(", ") || ""} placeholder="4, 8"/></label><label>Meal plan<input name="meal_plan" defaultValue={editing === "new" ? "" : editing.meal_plan || ""} placeholder="Room only / Breakfast"/></label><label>Total amount<input name="total_amount" type="number" min="0" step="0.01" defaultValue={editing === "new" ? "" : editing.total_amount ?? ""}/></label><label>Received<input name="received_amount" type="number" min="0" step="0.01" defaultValue={editing === "new" ? "" : editing.received_amount ?? ""}/></label><label>Currency<input name="currency_code" maxLength={3} defaultValue={editing === "new" ? data.property.currency_code || "LKR" : editing.currency_code || "LKR"}/></label><label className="voucher-check"><input name="voucher_sent" type="checkbox" defaultChecked={editing !== "new" && editing.voucher_sent}/><span>Voucher sent</span></label><label className="wide">Notes<textarea name="notes" defaultValue={editing === "new" ? "" : editing.notes || ""}/></label></div><footer><button type="button" onClick={() => { setEditing(null); setDraft(null); }}>Cancel</button><button className="primary-action" disabled={saving}>{saving ? "Savingâ€¦" : draft?.action === "block" ? "Block dates" : "Save booking"}</button></footer></form></div>}
+    {editing && data.property && <div className="calendar-detail-backdrop" onClick={() => { setEditing(null); setDraft(null); }}><form className="calendar-booking-form" onClick={event => event.stopPropagation()} onSubmit={saveBooking}><button type="button" className="modal-close" aria-label="Close booking window" onClick={() => { setEditing(null); setDraft(null); }}><X size={18}/></button><small>SUPABASE CALENDAR</small><h3>{draft?.action === "block" ? "Block room dates" : editing === "new" ? "Add booking" : "Edit booking"}</h3><div className="booking-form-grid"><label>Guest name<input name="guest_name" defaultValue={draft?.action === "block" ? "Blocked" : editing === "new" ? "" : editing.guest_name} required/></label><fieldset className="wide booking-room-selector"><legend>Room allocation</legend>{roomNames.map(room => { const checked = editing === "new" ? Boolean(draft?.roomNames.includes(room)) : selectedRooms.includes(room); return <label key={room}><input name="room_names" type="checkbox" value={room} defaultChecked={checked}/><span>{room}</span></label>; })}</fieldset><label>Check-in<input name="check_in" type="date" min={editing === "new" ? todayKey : undefined} defaultValue={editing === "new" ? draft?.checkIn || todayKey : editing.check_in} required/></label><label>Check-out<input name="check_out" type="date" min={editing === "new" ? dateKey(addDays(today, 1)) : undefined} defaultValue={editing === "new" ? draft?.checkOut || dateKey(addDays(today, 1)) : editing.check_out} required/></label><label>Source<select name="booking_source" defaultValue={draft?.action === "block" ? "Blocked" : editing === "new" ? "FIT" : editing.booking_source === "Direct" ? "FIT" : editing.booking_source}>{["FIT","Booking.com","Agoda","Expedia","Airbnb","Travel Agent","Blocked"].map(value => <option key={value}>{value}</option>)}</select></label><label>Status<select name="booking_status" defaultValue={draft?.action === "block" ? "Blocked" : editing === "new" ? "Confirmed" : editing.booking_status}>{["Confirmed","Pending","Checked In","Checked Out","Blocked"].map(value => <option key={value}>{value}</option>)}</select></label><label>Reference<input name="booking_reference" defaultValue={editing === "new" ? "" : editing.booking_reference || ""}/></label><label>Phone<input name="phone" defaultValue={editing === "new" ? "" : editing.phone || ""}/></label><label>Email<input name="email" type="email" defaultValue={editing === "new" ? "" : editing.email || ""}/></label><label>Adults<input name="adults" type="number" min="0" defaultValue={editing === "new" ? 1 : editing.adults || 1}/></label><label>Children<input name="children" type="number" min="0" defaultValue={editing === "new" ? 0 : editing.children || 0}/></label><label>Children ages<input name="children_ages" defaultValue={editing === "new" ? "" : editing.children_ages?.join(", ") || ""} placeholder="4, 8"/></label><label>Meal plan<input name="meal_plan" defaultValue={editing === "new" ? "" : editing.meal_plan || ""} placeholder="Room only / Breakfast"/></label><label>Total amount<input name="total_amount" type="number" min="0" step="0.01" defaultValue={editing === "new" ? "" : editing.total_amount ?? ""}/></label><label>Received<input name="received_amount" type="number" min="0" step="0.01" defaultValue={editing === "new" ? "" : editing.received_amount ?? ""}/></label><label>Currency<input name="currency_code" maxLength={3} defaultValue={editing === "new" ? data.property.currency_code || "LKR" : editing.currency_code || "LKR"}/></label><label className="voucher-check"><input name="voucher_sent" type="checkbox" defaultChecked={editing !== "new" && editing.voucher_sent}/><span>Voucher sent</span></label><label className="wide">Notes<textarea name="notes" defaultValue={editing === "new" ? "" : editing.notes || ""}/></label></div><footer><button type="button" onClick={() => { setEditing(null); setDraft(null); }}>Cancel</button><button className="primary-action" disabled={saving}>{saving ? "Savingâ€¦" : draft?.action === "block" ? "Block dates" : "Save booking"}</button></footer></form></div>}
     {cancelTarget && <div className="calendar-detail-backdrop"><form className="calendar-cancel-form" onSubmit={event => { event.preventDefault(); const reason = String(new FormData(event.currentTarget).get("reason") || ""); void cancelBooking(reason); }}><button type="button" className="modal-close" aria-label="Close cancellation window" onClick={() => setCancelTarget(null)}><X size={18}/></button><small>PRESERVE BOOKING HISTORY</small><h3>Cancel {cancelTarget.guest_name}?</h3><p>The reservation will leave the active calendar, but its history will remain available for reporting and auditing.</p><label>Cancellation reason<textarea name="reason" required placeholder="Guest request, duplicate booking, payment issueâ€¦"/></label><footer><button type="button" onClick={() => setCancelTarget(null)}>Keep booking</button><button className="danger" disabled={saving}>{saving ? "Cancellingâ€¦" : "Cancel reservation"}</button></footer></form></div>}
     {deleteTarget && <div className="calendar-detail-backdrop"><form className="calendar-cancel-form" onSubmit={event => { event.preventDefault(); void deleteBooking(); }}><button type="button" className="modal-close" aria-label="Close deletion window" onClick={() => setDeleteTarget(null)}><X size={18}/></button><small>MASTER ACCESS Â· PERMANENT ACTION</small><h3>Delete {deleteTarget.guest_name} permanently?</h3><p>This removes every room allocation in this reservation group and cannot be undone. Use Cancel reservation instead when history must be preserved.</p><footer><button type="button" onClick={() => setDeleteTarget(null)}>Keep booking</button><button className="danger" disabled={saving}>{saving ? "Deletingâ€¦" : "Delete permanently"}</button></footer></form></div>}
   </section>;
 }
+
+
 
 
