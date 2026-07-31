@@ -12,20 +12,13 @@ const jakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "NKH Dashboard",
-  description: "N K Hotels staff operations dashboard",
-  applicationName: "NKH Dashboard",
+  title: { default: "N K Hotel OS", template: "%s | N K Hotel OS" },
+  description: "Simple hotel management and business growth platform for boutique hotels, villas and small resorts.",
+  applicationName: "N K Hotel OS",
   manifest: "/manifest.webmanifest",
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "black-translucent",
-    title: "NKH Dashboard",
-  },
+  appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "N K Hotel OS" },
   formatDetection: { telephone: false },
-  icons: {
-    icon: "/api/pwa-icon?size=192",
-    apple: "/api/pwa-icon?size=180",
-  },
+  icons: { icon: "/api/pwa-icon?size=192", apple: "/api/pwa-icon?size=180" },
 };
 
 export const viewport: Viewport = {
@@ -38,11 +31,7 @@ export const viewport: Viewport = {
   ],
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${jakarta.className} ${jakarta.variable}`}>
