@@ -1,4 +1,4 @@
-/*
+﻿/*
   N K Hotel OS active global stylesheet.
   Old Staff Dashboard themes, login layouts, WhatsApp workspaces and legacy
   dashboard overrides are intentionally no longer imported.
@@ -181,4 +181,12 @@ button {
     bottom:calc(78px + env(safe-area-inset-bottom));
     min-width:0;
   }
+}
+
+/* NK HOTEL OS PWA BRAND ICON */
+img.pwa-install-icon{
+  object-fit:cover;
+  background:#fff;
+  border:1px solid #e4e8ea;
+  box-shadow:0 4px 12px rgba(32,37,43,.10);
 }

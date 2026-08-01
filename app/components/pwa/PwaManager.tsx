@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { Download, Share2, X } from "lucide-react";
@@ -128,7 +128,7 @@ export default function PwaManager() {
 
       {showInstall && installPrompt && (
         <aside className="pwa-install-card" aria-label="Install N K Hotel OS">
-          <div className="pwa-install-icon">NK</div>
+          <img className="pwa-install-icon" src="/icons/icon-192.png" alt="" />
           <div className="pwa-install-copy">
             <strong>Install N K Hotel OS</strong>
             <small>Open faster from your phone home screen</small>
@@ -145,7 +145,7 @@ export default function PwaManager() {
 
       {showIosHelp && (
         <aside className="pwa-install-card pwa-ios-card" aria-label="Install N K Hotel OS on iPhone">
-          <div className="pwa-install-icon">NK</div>
+          <img className="pwa-install-icon" src="/icons/icon-192.png" alt="" />
           <div className="pwa-install-copy">
             <strong>Install N K Hotel OS</strong>
             <small><Share2 size={13} /> Tap Share, then Add to Home Screen</small>
@@ -168,3 +168,4 @@ export default function PwaManager() {
     </>
   );
 }
+

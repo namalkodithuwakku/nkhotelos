@@ -1,4 +1,4 @@
-import type { Metadata, Viewport } from "next";
+﻿import type { Metadata, Viewport } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import ThemeProvider from "./providers/ThemeProvider";
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   manifest: "/manifest.webmanifest",
   appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "N K Hotel OS" },
   formatDetection: { telephone: false },
-  icons: { icon: "/api/pwa-icon?size=192", apple: "/api/pwa-icon?size=180" },
+  icons: { icon: "/icons/icon-192.png", shortcut: "/favicon.ico", apple: "/icons/icon-180.png" },
 };
 
 export const viewport: Viewport = {
@@ -41,3 +41,4 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     </html>
   );
 }
+

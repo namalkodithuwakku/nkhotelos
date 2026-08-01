@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import {
   BedDouble, Bell, Building2, CalendarDays, ChartNoAxesCombined, Hotel,
@@ -197,7 +197,7 @@ export default function PersistentOSLayout({ children }: { children: ReactNode }
           aria-label="Open menu"
         >
           <span>MENU</span>
-          <b>›</b>
+          <b>â€º</b>
         </button>
 
         <aside
@@ -215,11 +215,11 @@ export default function PersistentOSLayout({ children }: { children: ReactNode }
             aria-label="Close menu"
           >
             <span>CLOSE</span>
-            <b>‹</b>
+            <b>â€¹</b>
           </button>
 
           <div className={styles.brand}>
-            <span><Hotel size={22} /></span>
+            <span><img src="/icons/icon-192.png" alt="N K Hotel OS" /></span>
             <div>
               <strong>N K Hotel <b>OS</b></strong>
               <small>Simplifying Life</small>
@@ -309,3 +309,4 @@ export default function PersistentOSLayout({ children }: { children: ReactNode }
     </OSLayoutProvider>
   );
 }
+
